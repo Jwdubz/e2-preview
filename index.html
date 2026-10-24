@@ -40,7 +40,6 @@
   </div>
 </header>
 
-<!-- Phone menu: the sections first, then the four next-step actions -->
 <div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-label="Menu" aria-hidden="true" inert>
   <div class="sheet__top">
     <a class="plate plate--sheet" href="#top" data-close aria-label="E² Studios, Back To Top">
@@ -70,8 +69,6 @@
 
 <main id="main">
 
-<!-- 1. Hero: one composite film fills the whole first screen; the headline is set large over it (no tint, scrim or filter on the footage). Header floats on the film.
-     The poster is the film's real first frame (picture sits under the video), so frame 0 is already the full film. -->
 <section class="hero" id="top" aria-label="Opening Film">
   <div class="stage" id="heroStage">
     <picture class="hero__poster"><source media="(min-aspect-ratio:9/10)" srcset="media/hero-wide-poster.jpg"><img src="media/hero-phone-poster.jpg" alt="" width="720" height="1280" fetchpriority="high" decoding="async"></picture>
@@ -80,7 +77,6 @@
   <p class="hero__sub" id="heroSub"><i aria-hidden="true"></i>Private Tattoo Studio, Las Vegas</p>
 </section>
 
-<!-- 2. The big type moment (round 7: no pin, no scroll lock). The outline inks itself in, letter by letter, once it arrives on screen. -->
 <section class="stmt" id="stmt" aria-labelledby="h-stmt">
   <div class="stmt__pin">
     <h2 id="h-stmt" class="stmt__line" aria-label="Never Copied.">Never Copied.</h2>
@@ -88,12 +84,10 @@
   </div>
 </section>
 
-<!-- 3. Stencil film, full bleed, no words on it -->
 <section class="beat beat--film" aria-label="The Stencil">
   <div class="stage film"><video class="film-el" muted playsinline loop preload="metadata" poster="media/stencil-wide-poster.jpg" data-src="media/stencil-wide.mp4" data-ply data-focus="0.5"></video></div>
 </section>
 
-<!-- 4. Signature one: full-bleed, pinned, two panels of one real piece (outline stage, colour stage), both moved by your scroll. Each title has its own solid row above its film, at the same height, so it never sits on linework. -->
 <section class="scrub" id="scrub" aria-labelledby="h-scrub">
   <h2 id="h-scrub" class="sr">Outline First. Colour Second.</h2>
   <div class="scrub__pin">
@@ -103,8 +97,6 @@
   </div>
 </section>
 
-<!-- 5. The studio (round 7): the finished sleeve plays on its own loop and holds its place while the three studio rules pass beside it.
-     The leaf draws itself once when the section arrives. No scroll scrub here, so the page has one scrub signature, not three. -->
 <section class="leaf" id="leaf" aria-labelledby="h-leaf">
   <div class="leaf__film"><video id="leafVideo" class="film-el" muted playsinline loop preload="none" poster="media/leaf-scrub-poster.jpg" data-src="media/leaf-scrub.mp4" data-ply data-focus="0.5" aria-hidden="true"></video></div>
   <div class="leaf__side">
@@ -120,7 +112,6 @@
   </div>
 </section>
 
-<!-- 6. Work strip -->
 <section class="wall" id="wall" aria-labelledby="h-wall">
   <div class="wall__head">
     <h2 id="h-wall" class="rv">Pieces From Angie's Portfolio.</h2>
@@ -142,7 +133,6 @@
   <div class="wall__bar" aria-hidden="true"><i id="wBar"></i></div>
 </section>
 
-<!-- 7. The artist: her own portrait (from her site's "Meet the Artists" block) and her own facts (About page) -->
 <section class="artist" id="artist" aria-labelledby="h-artist">
   <figure class="artist__por rv">
     <img src="media/angie.jpg" width="720" height="1080" loading="lazy" decoding="async" alt="Angie Leaf, smiling, in a black tank top and a beaded necklace">
@@ -159,7 +149,6 @@
   </div>
 </section>
 
-<!-- 8. Cover-ups: her real cover-up, three stages, frames from her own reel (ig DX-aa41P2nk, "Yosemite coverup"). Healing (p)arts named in text only: her site has no healing (p)arts images ("Coming Soon"). -->
 <section class="heal" id="cover" aria-labelledby="h-heal">
   <div class="heal__in">
     <div class="heal__txt rv">
@@ -178,7 +167,6 @@
   </div>
 </section>
 
-<!-- 9. Closing film, then its words underneath (nothing on the footage). The idea form writes a real email or text in the visitor's own app (round 7: direct links with their targets shown; no attachment promise). -->
 <section class="beat beat--close" aria-labelledby="h-close">
   <div class="stage film"><video class="film-el" muted playsinline loop preload="metadata" poster="media/close-tri-poster.jpg" data-src="media/close-tri.mp4" data-ply data-focus="0.5" aria-hidden="true"></video></div>
   <ul class="close__labels" aria-label="Three more pieces by Angie">
@@ -216,7 +204,6 @@
   </div>
 </section>
 
-<!-- 10. The ask -->
 <section class="ask" id="ask" aria-labelledby="h-ask">
   <div class="ask__in rv">
     <div class="ask__copy">

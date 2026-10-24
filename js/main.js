@@ -1,14 +1,11 @@
-/* E² Studios concept. Always-motion build: this file never reads the OS motion setting.
-   Motion is on by default; the only control is the on-page Pause Animations button (never persisted). */
 (function () {
   "use strict";
-  var RM = false; // forced: motion never depends on the OS setting
+  var RM = false;
   var doc = document, root = doc.documentElement;
   var PAUSED = false;
   var vids = [];
   var clips = window.HERO_CLIPS || [];
 
-  /* ---------- ply(): every video starts here ---------- */
   function tryPlay(v) {
     if (PAUSED) return;
     v.muted = true; v.defaultMuted = true; v.playsInline = true;
@@ -26,7 +23,6 @@
       v.addEventListener(ev, function () { if (v.paused && !PAUSED) tryPlay(v); });
     });
   }
-  /* retry on first user input, and a 1 s watchdog */
   ["pointerdown", "keydown", "wheel", "scroll", "touchstart"].forEach(function (ev) {
     window.addEventListener(ev, function () { if (!PAUSED) vids.forEach(tryPlay); }, { passive: true, once: true, capture: true });
   });
@@ -36,8 +32,6 @@
   }, 1000);
 
 
-  /* ---------- hero: data-driven. "wide" = one composite film of three panels (landscape-ish viewports), "tall" = one 9:16 film (phone, tablet).
-     The film fills ~93% of the first screen. Words sit in the thin caption band under it, split into letters, revealed on the film's clock. ---------- */
   var stage = doc.getElementById("heroStage");
   var h1 = doc.getElementById("heroH1");
   var clip = clips[0];
@@ -45,7 +39,6 @@
   var heroMode = null, heroVideo = null;
   var BAR = function () { return topbar ? topbar.offsetHeight : 0; };
 
-  /* wide cut for any viewport with aspect (width/height) >= 0.9, the 9:16 cut for every portrait viewport, at any width */
   function wantMode() { return (window.innerWidth / window.innerHeight >= 0.9) ? "wide" : "tall"; }
   function splitLetters(el, wi) {
     if (el.__split) return; el.__split = true;
@@ -62,14 +55,11 @@
     heroMode = mode; stage.setAttribute("data-mode", mode); if (stage.parentNode) stage.parentNode.setAttribute("data-mode", mode);
     var def = clip[mode];
     if (heroVideo) { var i = vids.indexOf(heroVideo); if (i > -1) vids.splice(i, 1); try { heroVideo.pause(); } catch (e) {} heroVideo.removeAttribute("src"); heroVideo.load(); if (heroVideo.parentNode) heroVideo.parentNode.removeChild(heroVideo); }
-    /* the <picture> poster (the film's real first frame) stays underneath, so frame 0 is already the full film; the video sits on top and is transparent until it has a frame */
     var v = doc.createElement("video");
     v.id = "heroVideo"; v.className = "film-el"; v.muted = true; v.loop = true; v.playsInline = true; v.preload = "auto";
     v.src = def.src;
     stage.appendChild(v); heroVideo = v; ply(v);
   }
-  /* wide cut: the composite is 1920x1080 with 3 px gutters at x 638-640 and 1279-1281. The film is cover-fitted, so measure the crop and
-     give each word its own panel (--pl left, --pw visible width). If a word is still wider than its panel, the headline steps down in size. */
   var PANELS = [[0, 638], [641, 1279], [1282, 1920]];
   var heroSub = doc.getElementById("heroSub");
   function placeSub() {
@@ -94,7 +84,6 @@
     ws.forEach(function (w) { var r = doc.createRange(); r.selectNodeContents(w); var tw = r.getBoundingClientRect().width, room = parseFloat(w.style.getPropertyValue("--pw")) - 2 * Math.min(28, Math.max(14, W * 0.015)); if (tw > room) worst = Math.min(worst, room / tw); });
     if (worst < 1) h1.style.fontSize = (fs * worst * 0.97).toFixed(1) + "px";
   }
-  /* headline: the words are already on screen in the first frame; the letters settle into place (no hiding, no waiting on the film) */
   Array.prototype.forEach.call(h1.querySelectorAll(".w"), function (w, n) { splitLetters(w, n); });
   buildHero(); placeWords();
   if (doc.fonts && doc.fonts.ready) doc.fonts.ready.then(placeWords);
@@ -102,7 +91,6 @@
   window.addEventListener("resize", function () { buildHero(); placeWords(); });
   function showAllWords() { h1.classList.add("go"); }
 
-  /* ---------- lazy secondary films: start near the viewport, never paused by scroll ---------- */
   var lazies = Array.prototype.slice.call(doc.querySelectorAll("video[data-src]"));
   lazies.forEach(function (v) {
     v.style.setProperty("--fx", Math.round(parseFloat(v.getAttribute("data-focus") || "0.5") * 100) + "%");
@@ -118,8 +106,6 @@
     lazies.forEach(function (v) { lio.observe(v); });
   } else lazies.forEach(startLazy);
   setTimeout(function () { lazies.forEach(function (v) { if (!v.getAttribute("src")) startLazy(v); }); }, 4000);
-  /* scroll-scrubbed films never autoplay: the scroll position is their clock. The second one loads when its section is near. */
-  /* ---------- the leaf: drawn by scroll, filled at the payoff ---------- */
   var svg = doc.getElementById("leafSvg"), leafSec = doc.getElementById("leaf");
   var NS = "http://www.w3.org/2000/svg";
   var parts = [];
@@ -166,12 +152,10 @@
     parts.fill.style.transform = "translateY(" + ((1 - f) * 100) + "%)";
   }
   function clamp01(x) { return Math.min(1, Math.max(0, x)); }
-  /* progress of a pinned section: 0 when its top reaches the bar, 1 when its end does */
   function secProgress(sec) {
     var r = sec.getBoundingClientRect(), bar = BAR(), span = r.height - (window.innerHeight - bar);
     return span > 0 ? clamp01((bar - r.top) / span) : 0;
   }
-  /* round 7: the leaf draws itself once (about 2.4 s) when the studio section arrives; Pause shows it finished */
   var leafP = 0, leafRun = false;
   function leafProgress() { return leafP; }
   function drawLeaf() {
@@ -184,7 +168,6 @@
     })(t0);
   }
 
-  /* the signatures: scroll position IS the film's clock (eased). One engine, two sections. */
   var scrubs = [];
   function makeScrub(sec, vid, fallback, onP) {
     var vl = Array.isArray(vid) ? vid : [vid], v0 = vl[0];
@@ -212,9 +195,7 @@
     } else drawLeaf();
   }
 
-  /* the big type moment: the line travels sideways with the scroll */
   var stmtSec = doc.getElementById("stmt"), stmtLine = stmtSec && stmtSec.querySelector(".stmt__line");
-  /* round 7: split into words (each word wraps as one unit on a phone), then letters; the letter index drives the ink delay */
   if (stmtLine && !stmtLine.__split) {
     stmtLine.__split = true; var words = stmtLine.textContent.split(" "), n = 0; stmtLine.textContent = "";
     words.forEach(function (wd, wi) {
@@ -231,7 +212,6 @@
     } else inkStmt();
   }
 
-  /* header: floats on the film, becomes a solid bar once the film is behind you; leaf motif fills with page progress */
   function pageProgress() { var h = doc.documentElement.scrollHeight - window.innerHeight; return h > 0 ? clamp01(window.scrollY / h) : 0; }
   function paintHL() { if (hlFill) hlFill.style.transform = "translateY(" + ((1 - (PAUSED ? 1 : pageProgress())) * 32).toFixed(1) + "px)"; }
   var heroSec = doc.getElementById("top");
@@ -245,7 +225,6 @@
   if (svg && leafSec) { buildLeaf(); paintLeaf(leafProgress()); }
   window.addEventListener("scroll", onScroll, { passive: true });
   window.addEventListener("resize", onScroll);
-  /* desktop section nav: underline the section being read */
   var navLinks = Array.prototype.slice.call(doc.querySelectorAll("#dnav a"));
   var navSecs = navLinks.map(function (a) { return doc.getElementById(a.getAttribute("href").slice(1)); });
   function paintNav() {
@@ -258,7 +237,6 @@
   var bookBtn = doc.querySelector(".top .btn--leaf"), sendSec = doc.getElementById("send");
   paintBar(); paintHL(); paintNav(); scrubs.forEach(function (o) { o.kick(); });
 
-  /* ---------- work strip: drag, buttons, progress, lightbox ---------- */
   var strip = doc.getElementById("strip"), wBar = doc.getElementById("wBar");
   if (strip) {
     var drag = null, moved = 0;
@@ -273,7 +251,6 @@
       if (moved > 5) { strip.classList.add("drag"); strip.scrollLeft = drag.l - dx; }
     });
     window.addEventListener("pointerup", function () { if (drag) { drag = null; setTimeout(function () { strip.classList.remove("drag"); }, 0); } });
-    /* card start positions in scroll coordinates (cards have different widths, so never assume one step size) */
     var stops = function () { var its = strip.querySelectorAll(".strip__it"), o = its.length ? its[0].offsetLeft : 0, m = strip.scrollWidth - strip.clientWidth; return Array.prototype.map.call(its, function (it) { return Math.min(m, it.offsetLeft - o); }); };
     var nearest = function (st) { var k = 0; st.forEach(function (v, i) { if (Math.abs(v - strip.scrollLeft) < Math.abs(st[k] - strip.scrollLeft)) k = i; }); return k; };
     var by = function (dir) {
@@ -282,7 +259,6 @@
       var k = nearest(st); t = st[Math.max(0, Math.min(st.length - 1, k + dir))];
       strip.scrollTo({ left: t, behavior: "smooth" });
     };
-    /* phone: one swipe moves one card. A hard fling can carry past the next snap point, so the momentum is stopped at the neighbouring card. */
     var swipe0 = null;
     strip.addEventListener("touchstart", function () { if (strip.clientWidth < 700) swipe0 = nearest(stops()); }, { passive: true });
     strip.addEventListener("scroll", function () {
@@ -291,7 +267,6 @@
       if (strip.scrollLeft > hi + 1) strip.scrollLeft = hi; else if (strip.scrollLeft < lo - 1) strip.scrollLeft = lo;
       clearTimeout(swipeT); swipeT = setTimeout(settle, 160);
     }, { passive: true });
-    /* when the swipe comes to rest, make sure it rests on a whole card (never between two) */
     var swipeT = 0, touching = false;
     strip.addEventListener("touchstart", function () { touching = true; }, { passive: true });
     strip.addEventListener("touchend", function () { touching = false; clearTimeout(swipeT); swipeT = setTimeout(settle, 160); }, { passive: true });
@@ -315,7 +290,6 @@
     lb.addEventListener("click", function (e) { if (e.target === lb) lb.close(); });
   }
 
-  /* ---------- reveals, with fail-safes ---------- */
   var rvs = Array.prototype.slice.call(doc.querySelectorAll(".rv"));
   function revealAll() { rvs.forEach(function (e) { e.classList.add("in"); }); }
   var footEl = doc.getElementById("foot");
@@ -332,7 +306,6 @@
   setTimeout(revealAll, 8000);
   function checkBottom() { if (window.innerHeight + window.scrollY >= doc.documentElement.scrollHeight - 4) revealAll(); }
 
-  /* ---------- Pause Animations: one control, in the header, so it never covers content ---------- */
   var btn = doc.getElementById("pauseBtn"), lbl = doc.getElementById("pauseLbl");
   btn.addEventListener("click", function () {
     PAUSED = !PAUSED;
@@ -349,7 +322,6 @@
     }
   });
 
-  /* ---------- phone menu: section links, then the four next-step actions ---------- */
   var menuBtn = doc.getElementById("menuBtn"), sheet = doc.getElementById("sheet"), sheetX = doc.getElementById("sheetX");
   function focusQuiet(el) { if (!el) return; try { el.focus({ preventScroll: true }); } catch (e) { el.focus(); } }
   function setSheet(open) {
@@ -358,7 +330,6 @@
       sheet.inert = false; sheet.removeAttribute("inert"); sheet.setAttribute("aria-hidden", "false");
       sheet.classList.add("open"); menuBtn.setAttribute("aria-expanded", "true"); focusQuiet(sheetX);
     } else {
-      /* move focus out first, then hide: a hidden subtree never keeps focus */
       if (sheet.contains(doc.activeElement)) focusQuiet(menuBtn);
       if (sheet.contains(doc.activeElement) && doc.activeElement.blur) doc.activeElement.blur();
       sheet.classList.remove("open"); sheet.inert = true; sheet.setAttribute("inert", ""); sheet.setAttribute("aria-hidden", "true");
@@ -372,8 +343,6 @@
     doc.addEventListener("keydown", function (e) { if (e.key === "Escape" && sheet.classList.contains("open")) setSheet(false); });
   }
 
-  /* ---------- in-page links (header, desktop nav, phone menu, footer): a smooth move to the section, then a visible arrival.
-     Book A Consult goes to the inquiry step (#send): its heading takes focus and the step announces itself, even if you are already there. ---------- */
   function arrive(el) {
     var cap = el.id === "send" ? el : null;
     if (!cap) return;
@@ -408,14 +377,12 @@
   });
   if (location.hash === "#send") setTimeout(function () { arrive(doc.getElementById("send")); }, 400);
 
-  /* ---------- the inquiry step (round 7): Email Angie and Text Angie are direct links to her own address and number.
-     A click always opens the visitor's app; whatever they typed above is written into the message. Nothing is sent from this page. ---------- */
   var idea = doc.getElementById("idea");
   if (idea) {
     var ideaSt = doc.getElementById("ideaSt"), okMsg = (doc.getElementById("ideaOk") || {}).textContent || "";
     var compose = function (a) {
       var f = idea.elements, name = f.name.value.trim(), it = f.idea.value.trim(), ph = f.phone.value.trim(), em = f.email.value.trim();
-      if (!name && !it && !ph && !em) return null; /* nothing typed: the link's own template opens as written */
+      if (!name && !it && !ph && !em) return null;
       var href = a.getAttribute("href") || "", to = href.split("?")[0];
       var body = "Hi Angie,\n\n" + (name ? "Name: " + name + "\n" : "") + (ph ? "Phone: " + ph + "\n" : "") + (em ? "Email: " + em + "\n" : "") + "\nMy idea: " + (it || "") + "\n";
       if (/^mailto:/i.test(to)) return to + "?subject=" + encodeURIComponent("My Tattoo Idea") + "&body=" + encodeURIComponent(body);
@@ -432,7 +399,6 @@
     idea.addEventListener("submit", function (e) { e.preventDefault(); var a = doc.getElementById("ideaMail"); if (a) a.click(); });
   }
 
-  /* ---------- hero: a mouse nudges the three words a few pixels (deeper word, larger move). Never the footage, never on touch, never while paused. ---------- */
   var heroWs = Array.prototype.slice.call(h1.querySelectorAll(".w"));
   if (heroSec) {
     heroSec.addEventListener("pointermove", function (e) {
