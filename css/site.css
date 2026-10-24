@@ -59,11 +59,15 @@ p{max-width:34em}
 .hero__h1 .c{display:inline-block;transform:translateY(.2em);transition:transform .75s cubic-bezier(.2,.7,.2,1);transition-delay:calc(var(--wi,0) * 120ms + var(--i) * 32ms)}
 .hero__h1.go .c{transform:none}
 .hero__sub{position:absolute;z-index:2;left:clamp(14px,1.6vw,28px);bottom:clamp(12px,2.6svh,28px);font:600 clamp(15px,1.25vw,20px)/1.2 var(--body);color:var(--cream);margin:0;max-width:none}
-@media (max-width:1000px){
-  .hero__h1{grid-template-columns:minmax(0,1fr);align-content:start;font-size:clamp(64px,19vw,160px);line-height:.88;padding-top:calc(var(--bar) + 10px)}
-  .hero__h1 .w{padding:0 var(--pad);align-self:auto}
-  .hero__h1 .w{padding-bottom:0}
-  .hero__sub{left:var(--pad);bottom:clamp(14px,3svh,30px)}
+/* tall (9:16) cut = any portrait viewport (aspect < 0.9), set by JS as data-mode on .hero; wide cut = everything else */
+.hero[data-mode="tall"] .hero__h1{grid-template-columns:repeat(3,max-content);justify-content:start;column-gap:.22em;align-content:start;align-items:start;padding:calc(var(--bar) + 10px) var(--pad) 0;font-size:clamp(56px,12vw,130px);line-height:.88}
+.hero[data-mode="tall"] .hero__h1 .w{padding:0;align-self:auto}
+.hero[data-mode="tall"] .hero__h1 .w3{grid-column:1;grid-row:2}
+.hero[data-mode="tall"] .hero__sub{left:var(--pad);bottom:clamp(14px,3svh,30px)}
+@media (max-width:700px){
+  .hero[data-mode="tall"] .hero__h1{grid-template-columns:minmax(0,1fr);padding:calc(var(--bar) + 10px) 0 0;font-size:clamp(64px,19vw,160px)}
+  .hero[data-mode="tall"] .hero__h1 .w{padding:0 var(--pad)}
+  .hero[data-mode="tall"] .hero__h1 .w3{grid-column:auto;grid-row:auto}
 }
 
 /* Film beats */
@@ -129,7 +133,7 @@ p{max-width:34em}
 .strip.drag{cursor:grabbing;scroll-snap-type:none;user-select:none}
 .strip__it{flex:none;scroll-snap-align:start;border:0;background:none;padding:0;border-radius:8px;overflow:hidden;cursor:inherit;display:block}
 .strip__it img{height:clamp(340px,62svh,640px);width:auto;max-width:none;object-fit:cover;border-radius:8px;transition:transform .7s cubic-bezier(.2,.7,.2,1);-webkit-user-drag:none;user-select:none}
-.strip__it:hover img{transform:scale(1.045)}
+.strip__it:hover img{transform:scale(1.03)}
 .wall__bar{position:relative;height:4px;border-radius:2px;background:rgba(31,18,20,.16);margin:22px var(--pad) 0}
 .wall__bar i{position:absolute;top:0;bottom:0;left:0;width:20%;background:var(--leaf);border-radius:2px}
 .lb{border:0;padding:0;background:transparent;max-width:100vw;max-height:100vh;margin:auto;overflow:visible}
@@ -202,21 +206,10 @@ p{max-width:34em}
 .js .rv{opacity:0;transform:translateY(26px);transition:opacity .8s ease,transform .8s cubic-bezier(.2,.7,.2,1)}
 .js .rv.in{opacity:1;transform:none}
 
-/* Paused state: freeze everything and show all hidden content */
+/* Paused state: freeze every autoplaying film and transition, show all hidden content. Layout never changes, so the page does not jump. */
 html.is-paused *,html.is-paused *::before,html.is-paused *::after{animation-play-state:paused!important;transition:none!important}
 html.is-paused .rv{opacity:1!important;transform:none!important}
 html.is-paused .hero__h1 .c{transform:none!important}
-html.is-paused .panel{position:static;opacity:1;transform:none;margin-bottom:28px;pointer-events:auto}
-html.is-paused .leaf{height:auto}
-html.is-paused .leaf__pin{position:static;height:auto;padding-top:80px;padding-bottom:80px}
-html.is-paused .leaf__copy{height:auto}
-html.is-paused .scrub{height:auto}
-html.is-paused .scrub__pin{position:static;height:auto}
-html.is-paused .scrub__film{height:78svh}
-html.is-paused .scrub .s{grid-area:auto;opacity:1!important;transform:none!important}
-html.is-paused .stmt{height:auto}
-html.is-paused .stmt__pin{position:static;height:auto;padding:80px 0}
-html.is-paused .stmt__line{white-space:normal;width:auto;transform:none;font-size:clamp(56px,11vw,180px);padding-right:var(--pad)}
 
 /* Tablet */
 @media (min-width:701px) and (max-width:1000px){
@@ -236,9 +229,7 @@ html.is-paused .stmt__line{white-space:normal;width:auto;transform:none;font-siz
   .pause span{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
   .menu{display:grid}
   .beat--film .film{height:min(var(--hh),64svh)}
-  .stmt__line{font-size:clamp(84px,24vw,140px)}
   .scrub{height:300vh;height:300svh}
-  .scrub__pin{grid-template-columns:minmax(0,1fr);grid-template-rows:60% minmax(0,1fr)}
   .scrub__side{padding:12px var(--pad) 0;justify-content:flex-start;gap:8px}
   .scrub__side h2{font-size:clamp(40px,12.4vw,60px)}
   .scrub__p{font-size:16px;line-height:1.4}
@@ -262,7 +253,6 @@ html.is-paused .stmt__line{white-space:normal;width:auto;transform:none;font-siz
   .close__cap{grid-template-columns:1fr;gap:12px}
   .ask__row .btn{flex:1 1 100%}
   .foot__in{grid-template-columns:1fr}
-  html.is-paused .leaf__pin{padding-top:96px}
 }
 .top .btn{white-space:nowrap}.menu{flex:none}.plate,.pause{flex:none}
 @media (max-width:400px){.plate{font-size:15px;gap:5px;padding:0 10px 0 8px}.top .btn{padding:0 10px;font-size:13px}}
@@ -277,6 +267,439 @@ html.is-paused .stmt__line{white-space:normal;width:auto;transform:none;font-siz
 .is-paused .stmt__line .c{opacity:1 !important}
 .is-paused .hero__h1 .c{transform:none !important;transition:none !important}
 /* title placement and colour per panel, picked from sampled real frames (see qa/contrast) */
-#scT1{--c:var(--ink);bottom:auto;top:42%}
-#scT2{--c:var(--cream);bottom:auto;top:clamp(20px,4svh,50px)}
 @media (max-width:700px){ #scrubVideoB{object-position:50% 0%} }
+/* round 5: the titles sit in their own rows now, so the phone pane is a wide band; centre it on the finished piece */
+@media (max-width:700px){ .scrub__vid #scrubVideoB{object-position:50% 56%} }
+
+/* ================= Round 5 ================= */
+
+/* 1. Hero: in the wide cut each word is placed inside its own panel of the film (JS measures the cover crop and writes --pl/--pw per word),
+   so no word crosses a gutter. Staged entrance: every letter is on screen from frame 0, the words settle panel by panel,
+   then a rust line draws under each word like an outline pass, and the full stop warms to rust last. */
+.hero[data-mode="wide"] .hero__h1{display:block}
+.hero[data-mode="wide"] .hero__h1 .w{position:absolute;left:calc(var(--pl,0px) + var(--wpad));bottom:clamp(34px,8svh,90px);padding:0;max-width:calc(var(--pw,33vw) - 2 * var(--wpad))}
+.hero__h1{--wpad:clamp(14px,1.5vw,28px)}
+.hero__h1 .c{transform:translateY(.42em) rotate(3deg);transform-origin:0 100%;transition:transform 1s cubic-bezier(.16,1,.3,1);transition-delay:calc(var(--wi,0) * 380ms + var(--i) * 45ms)}
+.hero__h1.go .c{transform:none}
+.hero__h1 .w{position:relative}
+.hero__h1 .w::after{content:"";position:absolute;left:0;right:.12em;bottom:-.08em;height:clamp(3px,.32vw,6px);border-radius:3px;background:var(--leaf-hot);transform:scaleX(0);transform-origin:0 50%;transition:transform .7s cubic-bezier(.65,0,.35,1);transition-delay:calc(900ms + var(--wi,0) * 380ms)}
+.hero__h1.go .w::after{transform:scaleX(1)}
+.hero__h1 .w3 .c:last-child{transition:transform 1s cubic-bezier(.16,1,.3,1) calc(2 * 380ms + 3 * 45ms),color .5s ease 2.1s}
+.hero__h1.go .w3 .c:last-child{color:var(--leaf-hot)}
+/* the line under the headline waits until the letters have settled, so the two never overlap mid-move (CSS-only, so it shows even without JS) */
+@keyframes subIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.hero__sub{animation:subIn 1s cubic-bezier(.16,1,.3,1) 1.7s both}
+html.is-paused .hero__h1 .w::after{transform:scaleX(1)!important}
+html.is-paused .hero__sub{animation:none!important;opacity:1!important;transform:none!important}
+
+/* 2. Scrub titles: their own solid row above each film, both rows the same height, so a title never sits on linework or bright skin. */
+.scrub__pane{display:flex;flex-direction:column}
+.scrub__t{position:static;flex:none;display:flex;align-items:center;gap:.26em;white-space:nowrap;height:clamp(76px,10.5svh,128px);padding:0 clamp(16px,1.8vw,34px);font-size:clamp(40px,5.2vw,100px);line-height:1}
+.scrub__t .l{display:inline}
+#scT1{background:var(--paper);color:var(--ink)}
+#scT2{background:var(--ink);color:var(--cream)}
+#scT2 .l:last-child{color:var(--accent)}
+.scrub__vid{position:relative;flex:1 1 auto;min-height:0;overflow:hidden}
+.scrub__vid .film-el{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:50% 40%;background:var(--ink)}
+@media (max-width:700px){
+  .scrub__t{height:clamp(52px,7.4svh,68px);font-size:clamp(32px,9.6vw,46px);padding:0 var(--pad)}
+}
+
+/* 3. The Artist: her portrait in the right column (no negative margin, nothing pokes into the strip above), facts beside it */
+.artist{grid-template-columns:minmax(0,1fr) clamp(280px,30vw,500px);padding:clamp(56px,7vw,112px) var(--pad);column-gap:clamp(28px,5vw,96px);align-items:center}
+.artist__por{grid-column:2;grid-row:1;margin:0;position:relative}
+.artist__por img{width:100%;height:auto;aspect-ratio:2/3;object-fit:cover;border-radius:10px;background:var(--ink)}
+.artist__por figcaption{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px;margin-top:14px;font-size:clamp(16px,1.2vw,19px)}
+.artist__por figcaption b{font:600 clamp(24px,2vw,34px)/1 var(--display)}
+.artist__body{grid-column:1;grid-row:1;padding:0;display:grid;gap:clamp(22px,3vw,44px)}
+.artist__body h2{font-size:clamp(52px,8vw,150px);line-height:.92}
+.artist__bio{font-size:clamp(19px,1.6vw,26px);line-height:1.4;max-width:30em}
+.artist__tl{gap:clamp(12px,1.6vw,24px)}
+.artist__tl li{padding-top:14px;grid-template-columns:minmax(120px,28%) minmax(0,1fr)}
+.artist__tl b{font-size:clamp(44px,5vw,92px)}
+@media (max-width:700px){
+  .artist{grid-template-columns:minmax(0,1fr);padding:clamp(40px,10vw,64px) var(--pad)}
+  .artist__por{grid-column:1;grid-row:1;width:min(78%,360px)}
+  .artist__body{grid-row:2;padding:clamp(28px,7vw,44px) 0 0}
+  .artist__body h2{font-size:clamp(48px,14vw,72px)}
+  .artist__bio{font-size:18px}
+  .artist__tl li{grid-template-columns:minmax(96px,30%) minmax(0,1fr)}
+  .artist__tl b{font-size:clamp(40px,12vw,60px)}
+}
+
+/* 4. Cover-Ups: text column on the same left edge as every other section; her real cover-up in three stages */
+.heal{padding:clamp(56px,7vw,112px) var(--pad)}
+.heal__in{max-width:none;margin:0;display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.5fr);gap:clamp(28px,5vw,96px);align-items:center}
+.heal__txt h2{font-size:clamp(48px,6.4vw,120px)}
+.heal__txt p{margin-top:20px;font-size:clamp(19px,1.5vw,24px);max-width:26em}
+.heal__txt .heal__div{font-size:clamp(17px,1.25vw,20px);color:rgba(251,244,230,.86);padding-top:20px;border-top:1px solid rgba(251,244,230,.24)}
+.heal__txt .heal__div b{color:var(--accent);font-weight:600}
+.heal__fig{margin:0}
+.heal__steps{list-style:none;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(8px,1vw,16px)}
+.heal__steps li{position:relative}
+.heal__steps img{width:100%;height:auto;aspect-ratio:3/4;object-fit:cover;border-radius:8px;background:var(--paper2)}
+.heal__steps span{display:block;margin-top:10px;font:600 clamp(20px,1.7vw,30px)/1 var(--display)}
+.heal__steps li:nth-child(2){transition-delay:.12s}.heal__steps li:nth-child(3){transition-delay:.24s}
+.heal__fig figcaption{margin-top:14px;font-size:15px;color:rgba(251,244,230,.72)}
+@media (max-width:1000px){.heal__in{grid-template-columns:minmax(0,1fr)}}
+@media (max-width:700px){
+  .heal__steps{gap:6px}
+  .heal__steps span{font-size:17px}
+}
+
+/* phone: the close triptych shows only its centre panel, cropped inside the panel's own gutters (no light/dark side strips) */
+@media (max-aspect-ratio:9/10){
+  .beat--close .film{height:auto;aspect-ratio:600/1080;max-height:none}
+}
+
+/* 7. Send Your Idea now carries the real path (email or text with photos attached); the ask is tight, no dead orange field */
+.close__cap{align-items:end}
+.close__r p{font-size:clamp(18px,1.5vw,24px);max-width:24em;padding:0}
+.close__row{display:flex;flex-wrap:wrap;gap:12px;margin-top:20px}
+.ask{padding:clamp(48px,6vw,96px) var(--pad);text-align:left}
+.ask__in{max-width:none;display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:clamp(18px,3vw,56px)}
+.ask__leaf{width:clamp(48px,4.6vw,80px);margin:0}
+.ask h2{font-size:clamp(48px,6.6vw,124px)}
+.ask p{margin:14px 0 0}
+.ask__row{margin:0;justify-content:flex-end}
+@media (max-width:1000px){
+  .ask__in{grid-template-columns:auto minmax(0,1fr)}
+  .ask__row{grid-column:1/-1;justify-content:flex-start}
+}
+@media (max-width:700px){
+  .ask__in{grid-template-columns:minmax(0,1fr)}
+  .ask__leaf{width:44px}
+  .ask h2{font-size:clamp(46px,13vw,64px)}
+  .close__row .btn{flex:1 1 100%}
+}
+
+/* 8. Footer basics */
+.foot__base{grid-column:1/-1;display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px 24px;margin-top:clamp(12px,2vw,24px);padding-top:16px;border-top:1px solid rgba(251,244,230,.18);font-size:15px}
+
+/* 9. Carousel: small captions from her own gallery labels, bigger arrows on desktop, one card per swipe on phone */
+.strip__it{position:relative}
+.strip__cap{display:block;margin-top:10px;font:500 15px/1.3 var(--body);color:var(--ink);text-align:left}
+.rnd{width:clamp(52px,4.6vw,76px);height:clamp(52px,4.6vw,76px)}
+.rnd svg{width:clamp(18px,1.6vw,26px);height:auto}
+@media (max-width:700px){
+  .strip{scroll-snap-type:x mandatory}
+  .strip__it{scroll-snap-stop:always}
+  /* a landscape piece never gets wider than the screen, so every swipe lands on one whole card with its caption */
+  .strip__it img{max-width:calc(100vw - 2 * var(--pad) - 30px)}
+  .wall__ctl{display:flex}
+  .wall__head{align-items:center}
+  .rnd{width:48px;height:48px}
+}
+
+/* 5. Phone menu: sections up top, actions below */
+.sheet{justify-content:flex-start;gap:0;padding:76px var(--pad) 28px;overflow-y:auto;overscroll-behavior:contain}
+.sheet__nav{display:flex;flex-direction:column;margin:8px 0 26px}
+.sheet__nav a{display:flex;justify-content:space-between;align-items:baseline;min-height:56px;padding:10px 2px;border-bottom:1px solid rgba(251,244,230,.2);text-decoration:none;color:var(--cream);font:600 clamp(28px,8.4vw,40px)/1.1 var(--display)}
+.sheet__nav a i{font:500 14px/1 var(--body);font-style:normal;color:var(--accent)}
+.sheet__nav a:hover span{color:var(--accent)}
+.sheet__k{margin:0 0 12px}
+.sheet__acts{display:grid;gap:10px}
+.sheet__a{min-height:56px;font-size:22px}
+.sheet .sheet__nav a,.sheet .sheet__k,.sheet .sheet__acts a{transform:translateY(14px);transition:transform .55s cubic-bezier(.2,.7,.2,1)}
+.sheet.open .sheet__nav a,.sheet.open .sheet__k,.sheet.open .sheet__acts a{transform:none}
+.sheet.open .sheet__nav a:nth-child(2){transition-delay:.04s}.sheet.open .sheet__nav a:nth-child(3){transition-delay:.08s}.sheet.open .sheet__nav a:nth-child(4){transition-delay:.12s}.sheet.open .sheet__nav a:nth-child(5){transition-delay:.16s}
+@media (max-height:700px){.sheet__nav a{min-height:48px;font-size:28px}.sheet__a{min-height:50px}}
+
+/* 10. Phone Arrive Alone / One Client A Day: copy on the page edge, the leaf as a small mark to the right of it */
+@media (max-width:700px){
+  .leaf__pin{grid-template-columns:minmax(0,1fr) 70px;grid-template-rows:50% minmax(0,1fr);gap:0 10px}
+  .leaf__copy{grid-column:1;grid-row:2;height:82%}
+  .leaf__copy .panel{left:var(--pad);right:0}
+  .leaf__art{grid-column:2;grid-row:2;height:56%;padding:0 14px 0 0;justify-content:flex-end;align-self:center}
+  .panel h2{font-size:clamp(32px,9.4vw,42px)}
+}
+
+/* ================= Round 6 ================= */
+
+/* 2. Hero entrance: each word rises out of its own baseline mask, word by word (CSS animation, so it runs even before JS; no opacity flash).
+   The rust underline then draws, the full stop warms last. A pointer (mouse) nudges the words a few pixels, never the footage. */
+@keyframes heroRise{from{transform:translateY(1.6em)}to{transform:none}}
+.hero__h1 .w{clip-path:inset(-.3em -.25em -.42em -.25em)}
+.hero__h1 .c,.hero__h1.go .c{transform:none;transition:color .5s ease 2.1s;animation:heroRise 1.15s cubic-bezier(.16,1,.3,1) both;animation-delay:calc(180ms + var(--wi,0) * 300ms + var(--i) * 42ms)}
+.hero__h1 .w::after{transition-delay:calc(1150ms + var(--wi,0) * 300ms)}
+.hero__h1 .w{translate:var(--mx,0px) var(--my,0px);transition:translate .9s cubic-bezier(.2,.7,.2,1)}
+html.is-paused .hero__h1 .c{animation:none!important;transform:none!important}
+html.is-paused .hero__h1 .w{translate:none!important}
+
+/* phone: "Drawn For" on one line in the dark top of the film, "You." large at the dark foot of the film with the city line under it;
+   the bright skin in the middle stays clear (placement only, no overlay) */
+@media (max-width:700px){
+  .hero[data-mode="tall"] .hero__h1{display:block;padding:calc(var(--bar) + clamp(22px,3.4svh,34px)) var(--pad) 0;font-size:clamp(50px,15.4vw,76px)}
+  .hero[data-mode="tall"] .hero__h1 .w1,.hero[data-mode="tall"] .hero__h1 .w2{display:inline-block;position:relative;padding:0;vertical-align:top}
+  .hero[data-mode="tall"] .hero__h1 .w1{margin-right:.24em}
+  .hero[data-mode="tall"] .hero__h1 .w3{position:absolute;left:var(--pad);padding:0;bottom:calc(clamp(14px,3svh,30px) + 40px);font-size:clamp(76px,24vw,120px)}
+  .hero[data-mode="tall"] .hero__sub{bottom:clamp(14px,3svh,30px)}
+}
+
+/* 3. Never Copied: readable from the first frame as an outline (rust stroke), the scroll then fills it letter by letter */
+.stmt__line .c{opacity:1!important;color:rgb(238 107 63 / calc(.2 + var(--f,0) * .8));-webkit-text-stroke:max(1.5px,.011em) var(--accent);paint-order:stroke fill}
+.is-paused .stmt__line .c{color:var(--accent)}
+/* 4. No dead block after it: the pinned frame is only as tall as its content, centred while pinned (JS writes --st and the section height),
+   so the next film follows the paragraph directly */
+.stmt{height:auto}
+.stmt__pin{height:auto;top:var(--st,var(--bar));padding:clamp(56px,9svh,110px) 0 clamp(28px,4svh,44px);justify-content:flex-start}
+.stmt__sp{display:block}
+
+/* 5. Portfolio: every card is the same 3:4 frame; the photo scales inside its own frame, so nothing grows or shifts on hover */
+.strip{align-items:flex-start}
+.strip__it{overflow:visible;border-radius:0;width:auto}
+.strip__fr{display:block;overflow:hidden;border-radius:8px;height:clamp(340px,62svh,640px);aspect-ratio:3/4;background:var(--ink)}
+.strip__fr img,.strip__it img{width:100%;height:100%;max-width:none;object-fit:cover;object-position:50% 50%;border-radius:0}
+.strip__it:hover img{transform:scale(1.045)}
+.strip__cap{width:0;min-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media (max-width:700px){
+  .strip__fr{height:clamp(300px,52svh,460px);max-width:calc(100vw - 2 * var(--pad) - 30px)}
+  .strip__it img{max-width:none}
+}
+
+/* 6. Desktop section nav: one paper pill in the header, the current section underlined in rust */
+.dnav{display:none}
+@media (min-width:1300px){
+  .top{gap:16px}
+  .dnav{display:flex;align-items:center;margin:0 auto;min-height:44px;padding:0 6px;border-radius:999px;background:var(--paper)}
+  .dnav a{position:relative;display:flex;align-items:center;min-height:44px;padding:0 13px;font:500 15px/1 var(--body);color:var(--ink);text-decoration:none;white-space:nowrap}
+  .dnav a::after{content:"";position:absolute;left:13px;right:13px;bottom:10px;height:2px;border-radius:2px;background:var(--leaf-hot);transform:scaleX(0);transform-origin:0 50%;transition:transform .35s cubic-bezier(.2,.7,.2,1)}
+  .dnav a:hover::after,.dnav a.on::after{transform:scaleX(1)}
+  .dnav a.on{color:var(--leaf)}
+  .top.solid .dnav{background:transparent}
+}
+@media (min-width:701px) and (max-width:1299px){ .menu{display:grid} }
+
+/* 1. The inquiry step: Book A Consult lands here (smooth scroll, focus on the heading), the step announces itself once */
+.kick{font:600 14px/1 var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin:0 0 16px;max-width:none}
+.kick--cream{color:var(--cream);opacity:.85}
+.close__cap{position:relative;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);align-items:start;padding-top:clamp(40px,5vw,72px);padding-bottom:clamp(40px,5vw,72px);scroll-margin-top:var(--bar)}
+.close__cap h2{outline:none}
+.close__note{font-size:clamp(17px,1.3vw,21px)!important;max-width:24em;margin-top:22px;color:rgba(251,244,230,.86)}
+.idea{display:block}
+.idea__g{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px 16px}
+.idea__f{display:flex;flex-direction:column;gap:6px;font:500 14px/1.2 var(--body);color:rgba(251,244,230,.8)}
+.idea__f--w{grid-column:1/-1}
+.idea__f input,.idea__f textarea{width:100%;min-height:50px;padding:12px 14px;border-radius:10px;border:1.5px solid rgba(251,244,230,.38);background:rgba(251,244,230,.06);color:var(--cream);font:400 17px/1.35 var(--body);transition:border-color .2s,background-color .2s,box-shadow .4s}
+.idea__f textarea{resize:vertical;min-height:92px}
+.idea__f input:focus,.idea__f textarea:focus{outline:none;border-color:var(--accent);background:rgba(251,244,230,.1)}
+.idea__f textarea::placeholder{color:rgba(251,244,230,.5)}
+.idea .close__row{margin-top:18px}
+.idea__st{min-height:1.4em;margin-top:14px;font-size:16px;color:var(--cream);max-width:34em}
+.idea__st.need{color:var(--accent)}
+.close__cap::before{content:"";position:absolute;left:0;right:0;top:0;height:4px;background:var(--leaf-hot);transform:scaleX(0);transform-origin:0 50%}
+.close__cap.arrive::before{animation:askSweep 1.6s cubic-bezier(.65,0,.35,1) both}
+@keyframes askSweep{0%{transform:scaleX(0)}55%{transform:scaleX(1)}100%{transform:scaleX(1)}}
+.close__cap.arrive .kick{animation:kickIn .9s cubic-bezier(.2,.7,.2,1) .2s both}
+@keyframes kickIn{from{letter-spacing:.3em;color:var(--cream)}to{letter-spacing:.08em;color:var(--accent)}}
+.close__cap.arrive .idea__f:first-child input{animation:fieldGlow 1.8s ease .5s both}
+@keyframes fieldGlow{0%{border-color:rgba(251,244,230,.38);box-shadow:0 0 0 0 rgba(238,107,63,0)}35%{border-color:var(--accent);box-shadow:0 0 0 4px rgba(238,107,63,.35)}100%{border-color:var(--accent);box-shadow:0 0 0 0 rgba(238,107,63,0)}}
+html.is-paused .close__cap.arrive::before{transform:scaleX(1)}
+@media (max-width:1000px){ .close__cap{grid-template-columns:minmax(0,1fr)} }
+@media (max-width:700px){
+  .idea__g{grid-template-columns:minmax(0,1fr)}
+  .idea__f input,.idea__f textarea{font-size:16px}
+}
+
+/* 7. Footer: a closing line and the consult button, then studio, visit, contact and page columns, then the copyright row */
+.foot{padding:clamp(56px,7vw,112px) var(--pad) 28px}
+.foot__top{max-width:1400px;margin:0 auto clamp(40px,5vw,72px);display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:24px;padding-bottom:clamp(32px,4vw,56px);border-bottom:1px solid rgba(251,244,230,.18)}
+.foot__big{font:600 clamp(56px,9vw,168px)/.9 var(--display);letter-spacing:-.025em;max-width:none;color:var(--cream)}
+.foot__big span{color:var(--leaf-hot)}
+.foot__in{grid-template-columns:minmax(0,1.3fr) repeat(3,minmax(0,1fr));gap:clamp(24px,4vw,64px)}
+.foot__h{font:600 13px/1 var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:14px}
+.foot__about{margin-top:16px;font-size:16px;line-height:1.5;color:rgba(251,244,230,.82);max-width:22em}
+.foot__s{font-size:15px;color:rgba(251,244,230,.72);margin-top:6px}
+.foot address{line-height:1.55}
+.foot__col a{min-height:40px;line-height:40px}
+.foot__col address+.foot__s{margin-top:12px}
+.foot__base{margin-top:clamp(28px,4vw,56px)}
+@media (min-width:701px) and (max-width:1000px){ .foot__in{grid-template-columns:1fr 1fr} }
+@media (max-width:700px){
+  .foot__in{grid-template-columns:1fr 1fr;gap:28px 20px}
+  .foot__col--a{grid-column:1/-1}
+  .foot__top .btn{flex:1 1 100%}
+  .foot__big{font-size:clamp(50px,15vw,76px)}
+}
+
+/* 8. Phone: the closing triptych stays a 3-up strip (the whole film, width-fitted), and The Artist heading comes before her portrait */
+@media (max-aspect-ratio:9/10){
+  .beat--close .film{aspect-ratio:16/9;height:auto;max-height:none}
+  .beat--close .film .film-el{object-fit:cover;object-position:50% 50%}
+}
+@media (max-width:700px){
+  .artist{display:flex;flex-direction:column;align-items:stretch;gap:24px}
+  .artist__body{display:contents}
+  .artist__body h2{order:1}
+  .artist__por{order:2;width:100%}
+  .artist__bio{order:3}
+  .artist__tl{order:4}
+}
+/* Round 6b: juror-2 notes. Phone cover-up steps get real size (two up, the finished piece full width); footer tap rows 44px. */
+@media (max-width:700px){
+  .heal__steps{grid-template-columns:1fr 1fr;gap:10px}
+  .heal__steps li:nth-child(3){grid-column:1 / -1}
+  .heal__steps li:nth-child(3) img{aspect-ratio:4/3}
+  .foot__col a,.foot__base a{min-height:44px;line-height:44px}
+}
+/* Round 6b: more air between the cream bar and the pinned scrub titles. */
+.scrub__t{height:clamp(96px,13svh,152px);padding-top:clamp(12px,1.8svh,22px)}
+@media (max-width:700px){.scrub__t{height:clamp(64px,9svh,82px);padding-top:10px}}
+/* Round 6c: phone footer. The address column gets the full width so the street lines do not break mid-name; Contact and On This Page sit side by side under it. */
+@media (max-width:700px){
+  .foot__in>.foot__col:nth-child(2){grid-column:1/-1}
+}
+
+/* ================= Round 7 ================= */
+
+/* 1. Hero subtitle: its own solid ink label (like the header pills), larger, so it reads on any frame. Nothing is laid over the footage itself. */
+.hero__sub{display:inline-flex;align-items:center;gap:10px;padding:10px 18px 10px 14px;border-radius:999px;background:var(--ink);color:var(--cream);font:600 clamp(16px,1.3vw,22px)/1.2 var(--body);letter-spacing:.01em;left:clamp(14px,1.5vw,28px);bottom:clamp(16px,2.6svh,28px)}
+.hero__sub i{flex:none;width:9px;height:9px;border-radius:50%;background:var(--leaf-hot)}
+/* the words sit higher so the label never touches a word or its underline */
+.hero[data-mode="wide"] .hero__h1 .w{bottom:calc(clamp(16px,2.6svh,28px) + 1.2 * clamp(16px,1.3vw,22px) + 20px + clamp(30px,4.2svh,46px))}
+
+/* 2. Headline reveal: no mask, so a letter is never cut mid-rise. Each letter rises a short way and fades up in place. */
+.hero__h1 .w{clip-path:none}
+@keyframes heroRise7{from{transform:translateY(.38em);opacity:0}to{transform:none;opacity:1}}
+.hero__h1 .c,.hero__h1.go .c{animation:heroRise7 .95s cubic-bezier(.16,1,.3,1) both;animation-delay:calc(160ms + var(--wi,0) * 260ms + var(--i) * 40ms)}
+html.is-paused .hero__h1 .c{opacity:1!important}
+
+/* 3. Tall cut (phone, portrait tablet): "Drawn For / You." is one block in the dark top of the film; the label sits right under it (JS sets its top) */
+.hero[data-mode="tall"] .hero__sub{bottom:auto;left:var(--pad)}
+@media (max-width:700px){
+  .hero[data-mode="tall"] .hero__h1{display:block;padding:calc(var(--bar) + clamp(16px,2.6svh,26px)) var(--pad) 0;font-size:clamp(50px,17.5vw,92px);line-height:.92}
+  .hero[data-mode="tall"] .hero__h1 .w1,.hero[data-mode="tall"] .hero__h1 .w2{display:inline-block;position:relative;padding:0;vertical-align:top}
+  .hero[data-mode="tall"] .hero__h1 .w1{margin-right:.22em}
+  .hero[data-mode="tall"] .hero__h1 .w3{display:table;position:relative;left:auto;bottom:auto;padding:0;margin-top:.06em;font-size:1em}
+  .hero[data-mode="tall"] .hero__sub{font-size:16px;padding:9px 16px 9px 12px}
+}
+
+/* 4. Pause: one fixed footprint. Both labels are always laid out in the same cell; only the current one is visible. */
+.pause__lbls{display:inline-grid}
+.pause__l{grid-area:1/1;text-align:left;white-space:nowrap}
+.pause__l--b{visibility:hidden}
+.pause[data-state="paused"] .pause__l--a{visibility:hidden}
+.pause[data-state="paused"] .pause__l--b{visibility:visible}
+.pause__ico{flex:none}
+.pause:hover{background:var(--paper2);color:var(--ink);border-color:var(--leaf)}
+.pause[data-state="paused"],.pause[data-state="paused"]:hover{background:var(--ink);color:var(--cream);border-color:var(--ink)}
+@media (max-width:700px){ .pause .pause__lbls{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap} }
+
+/* 5 + 6 + 11. Never Copied: a normal band (no pin, no scroll lock). The outline inks itself in, letter by letter, once on arrival. */
+.stmt,.stmt[style]{height:auto!important}
+.stmt{padding:clamp(72px,11svh,150px) 0 clamp(56px,8svh,110px)}
+.stmt__pin{position:relative;top:auto;height:auto;padding:0;overflow:visible;justify-content:flex-start}
+.stmt__line{white-space:normal}
+.stmt__line .sw{display:inline-block;white-space:nowrap}
+.stmt__line .c{color:rgb(238 107 63 / .16);transition:color .55s ease;transition-delay:calc(120ms + var(--i) * 75ms)}
+.stmt.ink .stmt__line .c{color:var(--accent)}
+.stmt__p{opacity:0;transform:translateY(18px);transition:opacity .8s ease .45s,transform .8s cubic-bezier(.2,.7,.2,1) .45s}
+.stmt.ink .stmt__p{opacity:1;transform:none}
+html.is-paused .stmt__line .c{color:var(--accent)!important}
+html.is-paused .stmt__p{opacity:1!important;transform:none!important}
+@media (max-width:700px){
+  .stmt{padding:56px 0 48px}
+  .stmt__line{font-size:clamp(70px,26.5vw,130px);line-height:.9}
+  .stmt__line .sw{display:block}
+  .stmt__pin{gap:22px}
+  .stmt__p{font-size:19px}
+}
+
+/* 11. The studio: the sleeve film plays on its own and holds its place while the three rules pass beside it (desktop);
+   on a phone the film is a band and the rules follow in plain flow. No scrub, no pin, no empty stretches. */
+.leaf,.leaf[style]{height:auto!important}
+.leaf{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);align-items:start;background:var(--paper)}
+.leaf__film{display:block!important;grid-column:2;grid-row:1;position:sticky;top:var(--bar);height:calc(100vh - var(--bar));height:calc(100svh - var(--bar));overflow:hidden;background:var(--ink)}
+.leaf__film .film-el{width:100%;height:100%;object-fit:cover;object-position:50% 40%;background:var(--ink)}
+.leaf__side{display:block!important;grid-column:1;grid-row:1;padding:clamp(56px,9svh,110px) clamp(24px,3.6vw,72px) clamp(40px,7svh,90px) var(--pad);min-width:0}
+.leaf__head{display:flex;align-items:flex-end;gap:18px;margin-bottom:clamp(8px,2svh,24px)}
+.leaf__art{height:auto;width:clamp(80px,8vw,132px);flex:none;display:block;padding:0;align-self:auto}
+.leaf__art svg{width:100%;height:auto;max-width:none;overflow:visible}
+.leaf__k{font:600 14px/1 var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--leaf);margin:0 0 8px}
+.leaf__list{list-style:none}
+.rule{display:flex;flex-direction:column;justify-content:center;min-height:clamp(260px,40svh,420px);padding:clamp(28px,4svh,48px) 0;border-top:2px solid var(--ink)}
+.rule:last-child{min-height:0;padding-bottom:0}
+.rule i{font:500 14px/1 var(--body);font-style:normal;color:var(--leaf);letter-spacing:.06em;margin-bottom:14px}
+.rule h3{font:600 clamp(40px,4.6vw,86px)/1 var(--display);letter-spacing:-.01em;color:var(--ink)}
+.rule p{margin-top:16px;font-size:clamp(18px,1.45vw,24px);max-width:24em}
+@media (max-width:700px){
+  .leaf{display:block}
+  .leaf__film{position:relative;top:auto;height:auto;aspect-ratio:4/5}
+  .leaf__side{padding:40px var(--pad) 48px}
+  .leaf__art{width:76px;padding:0}
+  .rule{min-height:0;padding:22px 0 24px}
+  .rule h3{font-size:clamp(34px,10vw,44px)}
+  .rule p{font-size:17px;margin-top:10px}
+}
+@media (min-width:701px) and (max-width:1000px){ .leaf{grid-template-columns:minmax(0,1fr) minmax(0,.9fr)} }
+
+/* Portfolio: the strip starts on the page edge, so the previous card is never left as a sliver at the left */
+.strip{margin-left:var(--pad);padding:0 var(--pad) 10px 0;scroll-padding:0}
+/* Portfolio and The Artist get clearly different grounds */
+.artist{background:var(--cream);border-top:1px solid rgba(31,18,20,.14)}
+
+/* Cover-ups on a phone: the three stages in order, side by side, one swipe each (the next stage peeks in) */
+@media (max-width:700px){
+  .heal__steps{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;margin-right:calc(-1 * var(--pad));padding-right:var(--pad);overscroll-behavior-x:contain}
+  .heal__steps::-webkit-scrollbar{display:none}
+  .heal__steps li,.heal__steps li:nth-child(3){flex:0 0 74%;grid-column:auto;scroll-snap-align:start}
+  .heal__steps li:nth-child(3) img{aspect-ratio:3/4}
+  .heal__steps span{font-size:19px}
+}
+
+/* Closing film: one label under each of its three panels (under the film, never on it) */
+.close__labels{list-style:none;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));background:var(--ink);color:rgba(251,244,230,.86);margin:0 auto;max-width:none}
+.close__labels li{padding:12px clamp(12px,1.6vw,28px) 0;font:500 clamp(13px,1vw,16px)/1.3 var(--body);letter-spacing:.02em;border-left:1px solid rgba(251,244,230,.16)}
+.close__labels li:first-child{border-left:0}
+
+/* 8. Email Angie / Text Angie: clearly links (icon, the real address or number, an outbound arrow), not form buttons */
+.idea__via{margin-top:22px;font-size:15px;line-height:1.4;color:rgba(251,244,230,.78);max-width:34em}
+.via{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px;margin-top:12px}
+.via__a{display:flex;align-items:center;gap:14px;min-height:64px;padding:10px 16px;border-radius:12px;border:1.5px solid rgba(251,244,230,.3);color:var(--cream);text-decoration:none;transition:border-color .25s,background-color .25s,transform .25s}
+.via__ico{flex:none;color:var(--accent)}
+.via__t{display:flex;flex-direction:column;gap:3px;min-width:0;flex:1}
+.via__t b{font:600 17px/1.15 var(--body)}
+.via__t small{font:400 14px/1.2 var(--body);color:rgba(251,244,230,.72);overflow-wrap:anywhere;text-decoration:underline;text-decoration-color:rgba(251,244,230,.35);text-underline-offset:3px}
+.via__go{flex:none;opacity:.7;transition:transform .25s,opacity .25s}
+.via__a:hover{border-color:var(--accent);background:rgba(251,244,230,.06);transform:translateY(-2px)}
+.via__a:hover .via__go{transform:translate(3px,-3px);opacity:1}
+@media (max-width:1000px) and (min-width:701px){ .via{grid-template-columns:minmax(0,1fr) minmax(0,1fr)} }
+@media (max-width:700px){ .via{grid-template-columns:minmax(0,1fr)} }
+
+/* Step 2 lines up on the page edge like every other section; the leaf mark sits in its kicker */
+.ask__in{grid-template-columns:minmax(0,1fr) auto}
+.ask .kick{display:flex;align-items:center;gap:10px}
+.ask .kick .ask__leaf{width:16px;height:auto;margin:0;flex:none}
+@media (max-width:1000px){ .ask__in{grid-template-columns:minmax(0,1fr)} .ask__row{grid-column:1} }
+
+/* Header Book A Consult: a "you are here" ring once you reach the inquiry, the ask and the footer */
+.top .btn--leaf{transition:background-color .2s,color .2s,transform .2s,box-shadow .3s}
+.top .btn--leaf.here{box-shadow:0 0 0 3px var(--paper),0 0 0 5px var(--leaf-hot)}
+
+/* Hover interest: buttons lift with a soft rust glow */
+.btn--leaf:hover,.btn--cream:hover,.btn--line:hover{box-shadow:0 10px 24px -12px rgba(180,58,23,.7)}
+
+/* 10. Footer: E²'s own line (Heal. Transform. Evolve.), a short note in their words, then studio, visit, contact, services and page columns */
+.foot__lead{display:flex;flex-direction:column;gap:18px;min-width:0}
+.foot__big{font-size:clamp(46px,7vw,132px)}
+.foot__big .fw{display:inline-block;white-space:nowrap;color:var(--cream)}
+.foot__big b{font-weight:600;color:var(--cream);transition:color .6s ease}
+.foot.ink .foot__big .fw:nth-child(1) b{color:var(--leaf-hot);transition-delay:.2s}
+.foot.ink .foot__big .fw:nth-child(2) b{color:var(--leaf-hot);transition-delay:.55s}
+.foot.ink .foot__big .fw:nth-child(3) b{color:var(--leaf-hot);transition-delay:.9s}
+html.is-paused .foot__big b{color:var(--leaf-hot)!important}
+.foot__tag{font-size:clamp(17px,1.35vw,21px);line-height:1.45;color:rgba(251,244,230,.82);max-width:34em}
+.foot__in{grid-template-columns:minmax(0,1.3fr) minmax(0,1.25fr) repeat(3,minmax(0,1fr));gap:clamp(24px,3.2vw,52px)}
+.foot__list{list-style:none;display:grid;gap:8px;font-size:16px;color:rgba(251,244,230,.86)}
+.foot__list li{display:flex;align-items:center;gap:10px}
+.foot__list li::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--leaf-hot);flex:none}
+.foot a.fl{position:relative;text-decoration:none;background:linear-gradient(var(--leaf-hot),var(--leaf-hot)) 0 calc(50% + .75em)/0% 2px no-repeat;transition:background-size .35s cubic-bezier(.2,.7,.2,1),color .2s;overflow-wrap:anywhere}
+.foot a.fl:hover,.foot a.fl:focus-visible{background-size:100% 2px;color:#fff}
+@media (min-width:701px) and (max-width:1200px){ .foot__in{grid-template-columns:repeat(3,minmax(0,1fr))} .foot__col--a{grid-column:1/-1} }
+@media (max-width:700px){
+  .foot__big{font-size:clamp(44px,13.4vw,64px);line-height:.95}
+  .foot__big .fw{display:block}
+  .foot__in>.foot__col:nth-child(2){grid-column:1/-1}
+  .foot__col a,.foot__base a{min-height:44px;line-height:44px}
+}
+.stmt .stmt__p{color:rgb(246 238 226/.86)}

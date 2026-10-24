@@ -36,7 +36,7 @@
   }, 1000);
 
 
-  /* ---------- hero: data-driven. "wide" = one composite film of three panels (>=1001 px), "tall" = one 9:16 film (phone, tablet).
+  /* ---------- hero: data-driven. "wide" = one composite film of three panels (landscape-ish viewports), "tall" = one 9:16 film (phone, tablet).
      The film fills ~93% of the first screen. Words sit in the thin caption band under it, split into letters, revealed on the film's clock. ---------- */
   var stage = doc.getElementById("heroStage");
   var h1 = doc.getElementById("heroH1");
@@ -45,7 +45,8 @@
   var heroMode = null, heroVideo = null;
   var BAR = function () { return topbar ? topbar.offsetHeight : 0; };
 
-  function wantMode() { return window.innerWidth >= 1001 ? "wide" : "tall"; }
+  /* wide cut for any viewport with aspect (width/height) >= 0.9, the 9:16 cut for every portrait viewport, at any width */
+  function wantMode() { return (window.innerWidth / window.innerHeight >= 0.9) ? "wide" : "tall"; }
   function splitLetters(el, wi) {
     if (el.__split) return; el.__split = true;
     var t = el.textContent; el.textContent = ""; var i = 0;
@@ -58,7 +59,7 @@
   function buildHero() {
     var mode = wantMode();
     if (mode === heroMode || !clip) return;
-    heroMode = mode; stage.setAttribute("data-mode", mode);
+    heroMode = mode; stage.setAttribute("data-mode", mode); if (stage.parentNode) stage.parentNode.setAttribute("data-mode", mode);
     var def = clip[mode];
     if (heroVideo) { var i = vids.indexOf(heroVideo); if (i > -1) vids.splice(i, 1); try { heroVideo.pause(); } catch (e) {} heroVideo.removeAttribute("src"); heroVideo.load(); if (heroVideo.parentNode) heroVideo.parentNode.removeChild(heroVideo); }
     /* the <picture> poster (the film's real first frame) stays underneath, so frame 0 is already the full film; the video sits on top and is transparent until it has a frame */
@@ -67,12 +68,38 @@
     v.src = def.src;
     stage.appendChild(v); heroVideo = v; ply(v);
   }
+  /* wide cut: the composite is 1920x1080 with 3 px gutters at x 638-640 and 1279-1281. The film is cover-fitted, so measure the crop and
+     give each word its own panel (--pl left, --pw visible width). If a word is still wider than its panel, the headline steps down in size. */
+  var PANELS = [[0, 638], [641, 1279], [1282, 1920]];
+  var heroSub = doc.getElementById("heroSub");
+  function placeSub() {
+    if (!heroSub) return;
+    if (heroMode !== "tall") { heroSub.style.top = ""; return; }
+    var w3 = h1.querySelector(".w3"), hr = stage.parentNode.getBoundingClientRect();
+    if (!w3) return;
+    var b = w3.getBoundingClientRect().bottom - hr.top;
+    heroSub.style.top = Math.round(b + Math.max(16, parseFloat(getComputedStyle(h1).fontSize) * 0.26)) + "px";
+  }
+  function placeWords() {
+    var ws = h1.querySelectorAll(".w");
+    if (heroMode !== "wide") { h1.style.fontSize = ""; ws.forEach(function (w) { w.style.removeProperty("--pl"); w.style.removeProperty("--pw"); }); placeSub(); return; }
+    placeSub();
+    var W = stage.clientWidth, H = stage.clientHeight, dw = Math.max(W, H * 16 / 9), sc = dw / 1920, off = (dw - W) / 2;
+    ws.forEach(function (w, i) {
+      var a = Math.max(0, PANELS[i][0] * sc - off), b = Math.min(W, PANELS[i][1] * sc - off);
+      w.style.setProperty("--pl", a.toFixed(1) + "px"); w.style.setProperty("--pw", Math.max(0, b - a).toFixed(1) + "px");
+    });
+    h1.style.fontSize = "";
+    var fs = parseFloat(getComputedStyle(h1).fontSize), worst = 1;
+    ws.forEach(function (w) { var r = doc.createRange(); r.selectNodeContents(w); var tw = r.getBoundingClientRect().width, room = parseFloat(w.style.getPropertyValue("--pw")) - 2 * Math.min(28, Math.max(14, W * 0.015)); if (tw > room) worst = Math.min(worst, room / tw); });
+    if (worst < 1) h1.style.fontSize = (fs * worst * 0.97).toFixed(1) + "px";
+  }
   /* headline: the words are already on screen in the first frame; the letters settle into place (no hiding, no waiting on the film) */
   Array.prototype.forEach.call(h1.querySelectorAll(".w"), function (w, n) { splitLetters(w, n); });
-  buildHero();
+  buildHero(); placeWords();
+  if (doc.fonts && doc.fonts.ready) doc.fonts.ready.then(placeWords);
   requestAnimationFrame(function () { requestAnimationFrame(function () { h1.classList.add("go"); }); });
-  var lastW = window.innerWidth;
-  window.addEventListener("resize", function () { if (window.innerWidth !== lastW) { lastW = window.innerWidth; buildHero(); } });
+  window.addEventListener("resize", function () { buildHero(); placeWords(); });
   function showAllWords() { h1.classList.add("go"); }
 
   /* ---------- lazy secondary films: start near the viewport, never paused by scroll ---------- */
@@ -92,16 +119,6 @@
   } else lazies.forEach(startLazy);
   setTimeout(function () { lazies.forEach(function (v) { if (!v.getAttribute("src")) startLazy(v); }); }, 4000);
   /* scroll-scrubbed films never autoplay: the scroll position is their clock. The second one loads when its section is near. */
-  var leafVid = doc.getElementById("leafVideo");
-  function loadScrubVid(v) { if (v && !v.getAttribute("src")) { v.setAttribute("src", v.getAttribute("data-lazy")); v.preload = "auto"; v.load(); } }
-  if (leafVid) {
-    if ("IntersectionObserver" in window) {
-      var sio = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { loadScrubVid(leafVid); sio.disconnect(); } }); }, { rootMargin: "250% 0px" });
-      sio.observe(doc.getElementById("leaf"));
-    }
-    setTimeout(function () { loadScrubVid(leafVid); }, 6000);
-  }
-
   /* ---------- the leaf: drawn by scroll, filled at the payoff ---------- */
   var svg = doc.getElementById("leafSvg"), leafSec = doc.getElementById("leaf");
   var NS = "http://www.w3.org/2000/svg";
@@ -141,16 +158,12 @@
     parts.fillA = 0.84; parts.fillB = 1;
   }
   function paintLeaf(p) {
-    if (PAUSED) p = 1;
     parts.forEach(function (q) {
       var k = Math.min(1, Math.max(0, (p - q.a) / (q.b - q.a)));
       q.el.style.strokeDashoffset = String(1 - k);
     });
     var f = Math.min(1, Math.max(0, (p - parts.fillA) / (parts.fillB - parts.fillA)));
     parts.fill.style.transform = "translateY(" + ((1 - f) * 100) + "%)";
-    var panels = leafSec.querySelectorAll(".panel");
-    var idx = p < 0.34 ? 0 : p < 0.7 ? 1 : 2;
-    panels.forEach(function (el, i) { el.classList.toggle("on", i === idx); });
   }
   function clamp01(x) { return Math.min(1, Math.max(0, x)); }
   /* progress of a pinned section: 0 when its top reaches the bar, 1 when its end does */
@@ -158,8 +171,18 @@
     var r = sec.getBoundingClientRect(), bar = BAR(), span = r.height - (window.innerHeight - bar);
     return span > 0 ? clamp01((bar - r.top) / span) : 0;
   }
-  var leafP = 0;
-  function leafProgress() { return secProgress(leafSec); }
+  /* round 7: the leaf draws itself once (about 2.4 s) when the studio section arrives; Pause shows it finished */
+  var leafP = 0, leafRun = false;
+  function leafProgress() { return leafP; }
+  function drawLeaf() {
+    if (leafRun || !parts.length) return; leafRun = true;
+    var t0 = performance.now(), D = 2400;
+    (function step(now) {
+      if (PAUSED) { leafP = 1; paintLeaf(1); return; }
+      var k = Math.min(1, (now - t0) / D); leafP = 1 - Math.pow(1 - k, 2.2); paintLeaf(leafP);
+      if (k < 1) requestAnimationFrame(step);
+    })(t0);
+  }
 
   /* the signatures: scroll position IS the film's clock (eased). One engine, two sections. */
   var scrubs = [];
@@ -168,7 +191,7 @@
     var o = { sec: sec, vid: v0, cur: 0, run: false };
     o.tick = function () {
       o.run = false;
-      if (!v0 || !sec || PAUSED) return;
+      if (!v0 || !sec) return;
       var p = secProgress(sec), d = (v0.duration || fallback) - 0.05, target = p * d;
       o.cur += (target - o.cur) * 0.22; if (Math.abs(target - o.cur) < 0.004) o.cur = target;
       vl.forEach(function (vv) { if (vv && vv.readyState >= 1 && !vv.seeking && Math.abs(vv.currentTime - o.cur) > 0.012) { try { vv.currentTime = o.cur; } catch (e) {} } });
@@ -182,16 +205,30 @@
   var scSec = doc.getElementById("scrub"), sv = doc.getElementById("scrubVideo"), svB = doc.getElementById("scrubVideoB");
   var scBar = doc.getElementById("scBar"), hlFill = doc.getElementById("hlFill");
   var sc1 = makeScrub(scSec, [sv, svB], 4.67, function (p) { if (scBar) scBar.style.width = (p * 100).toFixed(1) + "%"; });
-  var sc2 = makeScrub(leafSec, leafVid, 9.3, function (p) { paintLeaf(p); });
+  if (leafSec) {
+    if ("IntersectionObserver" in window) {
+      var lfIO = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { drawLeaf(); lfIO.disconnect(); } }); }, { threshold: 0.5 });
+      lfIO.observe(doc.getElementById("leafSvg") || leafSec);
+    } else drawLeaf();
+  }
 
   /* the big type moment: the line travels sideways with the scroll */
   var stmtSec = doc.getElementById("stmt"), stmtLine = stmtSec && stmtSec.querySelector(".stmt__line");
-  var stmtCs = [];
-  if (stmtLine) { splitLetters(stmtLine, 0); stmtCs = Array.prototype.slice.call(stmtLine.querySelectorAll(".c")); }
-  function paintStmt() {
-    if (!stmtLine) return;
-    var p = PAUSED ? 1 : clamp01(secProgress(stmtSec) / 0.8), n = stmtCs.length;
-    stmtCs.forEach(function (c, i) { c.style.setProperty("--o", (0.16 + 0.84 * clamp01(p * (n + 3) - i)).toFixed(2)); });
+  /* round 7: split into words (each word wraps as one unit on a phone), then letters; the letter index drives the ink delay */
+  if (stmtLine && !stmtLine.__split) {
+    stmtLine.__split = true; var words = stmtLine.textContent.split(" "), n = 0; stmtLine.textContent = "";
+    words.forEach(function (wd, wi) {
+      var sw = doc.createElement("span"); sw.className = "sw"; sw.setAttribute("aria-hidden", "true");
+      wd.split("").forEach(function (ch) { var c = doc.createElement("span"); c.className = "c"; c.style.setProperty("--i", n++); c.textContent = ch; sw.appendChild(c); });
+      stmtLine.appendChild(sw); if (wi < words.length - 1) stmtLine.appendChild(doc.createTextNode(" "));
+    });
+  }
+  function inkStmt() { if (stmtSec) stmtSec.classList.add("ink"); }
+  if (stmtSec) {
+    if ("IntersectionObserver" in window) {
+      var inkIO = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { inkStmt(); inkIO.disconnect(); } }); }, { threshold: 0.45 });
+      inkIO.observe(stmtLine || stmtSec);
+    } else inkStmt();
   }
 
   /* header: floats on the film, becomes a solid bar once the film is behind you; leaf motif fills with page progress */
@@ -203,12 +240,23 @@
   var ticking = false;
   function onScroll() {
     if (ticking) return; ticking = true;
-    requestAnimationFrame(function () { ticking = false; paintBar(); paintHL(); paintStmt(); scrubs.forEach(function (o) { o.kick(); }); checkBottom(); });
+    requestAnimationFrame(function () { ticking = false; paintBar(); paintHL(); paintNav(); scrubs.forEach(function (o) { o.kick(); }); checkBottom(); });
   }
   if (svg && leafSec) { buildLeaf(); paintLeaf(leafProgress()); }
   window.addEventListener("scroll", onScroll, { passive: true });
   window.addEventListener("resize", onScroll);
-  paintBar(); paintHL(); paintStmt(); scrubs.forEach(function (o) { o.kick(); });
+  /* desktop section nav: underline the section being read */
+  var navLinks = Array.prototype.slice.call(doc.querySelectorAll("#dnav a"));
+  var navSecs = navLinks.map(function (a) { return doc.getElementById(a.getAttribute("href").slice(1)); });
+  function paintNav() {
+    if (!navLinks.length) return;
+    var line = BAR() + window.innerHeight * 0.35, k = -1;
+    navSecs.forEach(function (s, i) { if (s) { var r = s.getBoundingClientRect(); if (r.top <= line && r.bottom > line) k = i; } });
+    navLinks.forEach(function (a, i) { a.classList.toggle("on", i === k); if (i === k) a.setAttribute("aria-current", "true"); else a.removeAttribute("aria-current"); });
+    if (bookBtn && sendSec) { var sr = sendSec.getBoundingClientRect(); bookBtn.classList.toggle("here", sr.top <= line); }
+  }
+  var bookBtn = doc.querySelector(".top .btn--leaf"), sendSec = doc.getElementById("send");
+  paintBar(); paintHL(); paintNav(); scrubs.forEach(function (o) { o.kick(); });
 
   /* ---------- work strip: drag, buttons, progress, lightbox ---------- */
   var strip = doc.getElementById("strip"), wBar = doc.getElementById("wBar");
@@ -225,7 +273,35 @@
       if (moved > 5) { strip.classList.add("drag"); strip.scrollLeft = drag.l - dx; }
     });
     window.addEventListener("pointerup", function () { if (drag) { drag = null; setTimeout(function () { strip.classList.remove("drag"); }, 0); } });
-    var by = function (dir) { strip.scrollBy({ left: dir * Math.max(300, strip.clientWidth * 0.7), behavior: "smooth" }); };
+    /* card start positions in scroll coordinates (cards have different widths, so never assume one step size) */
+    var stops = function () { var its = strip.querySelectorAll(".strip__it"), o = its.length ? its[0].offsetLeft : 0, m = strip.scrollWidth - strip.clientWidth; return Array.prototype.map.call(its, function (it) { return Math.min(m, it.offsetLeft - o); }); };
+    var nearest = function (st) { var k = 0; st.forEach(function (v, i) { if (Math.abs(v - strip.scrollLeft) < Math.abs(st[k] - strip.scrollLeft)) k = i; }); return k; };
+    var by = function (dir) {
+      swipe0 = null;
+      var st = stops(), x = strip.scrollLeft, t;
+      var k = nearest(st); t = st[Math.max(0, Math.min(st.length - 1, k + dir))];
+      strip.scrollTo({ left: t, behavior: "smooth" });
+    };
+    /* phone: one swipe moves one card. A hard fling can carry past the next snap point, so the momentum is stopped at the neighbouring card. */
+    var swipe0 = null;
+    strip.addEventListener("touchstart", function () { if (strip.clientWidth < 700) swipe0 = nearest(stops()); }, { passive: true });
+    strip.addEventListener("scroll", function () {
+      if (swipe0 === null || strip.clientWidth >= 700) return;
+      var st = stops(), lo = st[Math.max(0, swipe0 - 1)], hi = st[Math.min(st.length - 1, swipe0 + 1)];
+      if (strip.scrollLeft > hi + 1) strip.scrollLeft = hi; else if (strip.scrollLeft < lo - 1) strip.scrollLeft = lo;
+      clearTimeout(swipeT); swipeT = setTimeout(settle, 160);
+    }, { passive: true });
+    /* when the swipe comes to rest, make sure it rests on a whole card (never between two) */
+    var swipeT = 0, touching = false;
+    strip.addEventListener("touchstart", function () { touching = true; }, { passive: true });
+    strip.addEventListener("touchend", function () { touching = false; clearTimeout(swipeT); swipeT = setTimeout(settle, 160); }, { passive: true });
+    var settle = function () {
+      if (touching || swipe0 === null) return;
+      var st = stops(), k = nearest(st), lo = Math.max(0, swipe0 - 1), hi = Math.min(st.length - 1, swipe0 + 1);
+      k = Math.max(lo, Math.min(hi, k));
+      if (Math.abs(strip.scrollLeft - st[k]) > 1) strip.scrollTo({ left: st[k], behavior: "smooth" });
+      else swipe0 = null;
+    };
     var pv = doc.getElementById("wPrev"), nx = doc.getElementById("wNext");
     if (pv) pv.addEventListener("click", function () { by(-1); });
     if (nx) nx.addEventListener("click", function () { by(1); });
@@ -242,6 +318,11 @@
   /* ---------- reveals, with fail-safes ---------- */
   var rvs = Array.prototype.slice.call(doc.querySelectorAll(".rv"));
   function revealAll() { rvs.forEach(function (e) { e.classList.add("in"); }); }
+  var footEl = doc.getElementById("foot");
+  if (footEl && "IntersectionObserver" in window) {
+    var fIO = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { footEl.classList.add("ink"); fIO.disconnect(); } }); }, { threshold: 0.25 });
+    fIO.observe(footEl);
+  } else if (footEl) footEl.classList.add("ink");
   if ("IntersectionObserver" in window) {
     var rio = new IntersectionObserver(function (es) {
       es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add("in"); rio.unobserve(e.target); } });
@@ -256,30 +337,110 @@
   btn.addEventListener("click", function () {
     PAUSED = !PAUSED;
     btn.setAttribute("data-state", PAUSED ? "paused" : "playing");
-    if (lbl) lbl.textContent = PAUSED ? "Play Animations" : "Pause Animations";
+    btn.setAttribute("aria-pressed", PAUSED ? "true" : "false");
     root.classList.toggle("is-paused", PAUSED);
     if (PAUSED) {
       vids.forEach(function (v) { try { v.pause(); } catch (e) {} });
       if (heroVideo && heroVideo.__wipe) { try { heroVideo.__wipe.finish(); } catch (e) {} }
-      revealAll(); showAllWords(); paintLeaf(1); paintHL(); paintStmt();
+      revealAll(); showAllWords(); paintHL(); inkStmt(); if (footEl) footEl.classList.add("ink"); leafP = 1; if (parts.length) paintLeaf(1);
     } else {
       vids.forEach(tryPlay);
-      paintLeaf(leafProgress()); paintHL(); paintStmt(); scrubs.forEach(function (o) { o.kick(); });
+      paintLeaf(leafProgress()); paintHL(); scrubs.forEach(function (o) { o.kick(); });
     }
   });
 
-  /* ---------- phone menu: a sheet of next-step actions only (book, email, call, directions) ---------- */
+  /* ---------- phone menu: section links, then the four next-step actions ---------- */
   var menuBtn = doc.getElementById("menuBtn"), sheet = doc.getElementById("sheet"), sheetX = doc.getElementById("sheetX");
+  function focusQuiet(el) { if (!el) return; try { el.focus({ preventScroll: true }); } catch (e) { el.focus(); } }
   function setSheet(open) {
-    sheet.classList.toggle("open", open); sheet.setAttribute("aria-hidden", open ? "false" : "true");
-    menuBtn.setAttribute("aria-expanded", open ? "true" : "false");
-    if (open) sheetX.focus(); else menuBtn.focus();
+    if (!sheet || !menuBtn) return;
+    if (open) {
+      sheet.inert = false; sheet.removeAttribute("inert"); sheet.setAttribute("aria-hidden", "false");
+      sheet.classList.add("open"); menuBtn.setAttribute("aria-expanded", "true"); focusQuiet(sheetX);
+    } else {
+      /* move focus out first, then hide: a hidden subtree never keeps focus */
+      if (sheet.contains(doc.activeElement)) focusQuiet(menuBtn);
+      if (sheet.contains(doc.activeElement) && doc.activeElement.blur) doc.activeElement.blur();
+      sheet.classList.remove("open"); sheet.inert = true; sheet.setAttribute("inert", ""); sheet.setAttribute("aria-hidden", "true");
+      menuBtn.setAttribute("aria-expanded", "false");
+    }
   }
   if (menuBtn && sheet) {
     menuBtn.addEventListener("click", function () { setSheet(true); });
     sheetX.addEventListener("click", function () { setSheet(false); });
-    Array.prototype.forEach.call(sheet.querySelectorAll("[data-close]"), function (a) { a.addEventListener("click", function () { sheet.classList.remove("open"); sheet.setAttribute("aria-hidden", "true"); menuBtn.setAttribute("aria-expanded", "false"); }); });
+    Array.prototype.forEach.call(sheet.querySelectorAll("[data-close]"), function (a) { a.addEventListener("click", function () { setSheet(false); }); });
     doc.addEventListener("keydown", function (e) { if (e.key === "Escape" && sheet.classList.contains("open")) setSheet(false); });
+  }
+
+  /* ---------- in-page links (header, desktop nav, phone menu, footer): a smooth move to the section, then a visible arrival.
+     Book A Consult goes to the inquiry step (#send): its heading takes focus and the step announces itself, even if you are already there. ---------- */
+  function arrive(el) {
+    var cap = el.id === "send" ? el : null;
+    if (!cap) return;
+    Array.prototype.forEach.call(cap.querySelectorAll(".rv"), function (r) { r.classList.add("in"); });
+    cap.classList.remove("arrive"); void cap.offsetWidth; cap.classList.add("arrive");
+    var h = doc.getElementById("h-close"); if (h) { try { h.focus({ preventScroll: true }); } catch (e) { h.focus(); } }
+  }
+  function goTo(id) {
+    var el = doc.getElementById(id); if (!el) return false;
+    var maxY = doc.documentElement.scrollHeight - window.innerHeight;
+    var y = id === "top" ? 0 : Math.round(el.getBoundingClientRect().top + window.scrollY - BAR());
+    y = Math.max(0, Math.min(maxY, y));
+    if (history.pushState) { try { history.pushState(null, "", "#" + id); } catch (e) {} }
+    if (Math.abs(window.scrollY - y) < 4) { arrive(el); return true; }
+    window.scrollTo({ top: y, behavior: "smooth" });
+    var last = -1, still = 0, t0 = Date.now();
+    (function wait() {
+      var s = window.scrollY;
+      if (Math.abs(s - y) < 3 || (s === last && ++still > 4) || Date.now() - t0 > 4000) { arrive(el); return; }
+      if (s !== last) still = 0; last = s; setTimeout(wait, 60);
+    })();
+    return true;
+  }
+  doc.addEventListener("click", function (e) {
+    if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    var a = e.target.closest && e.target.closest('a[href^="#"]'); if (!a) return;
+    var id = a.getAttribute("href").slice(1);
+    if (!id || id === "main" || !doc.getElementById(id)) return;
+    e.preventDefault();
+    if (sheet && sheet.classList.contains("open")) setSheet(false);
+    goTo(id);
+  });
+  if (location.hash === "#send") setTimeout(function () { arrive(doc.getElementById("send")); }, 400);
+
+  /* ---------- the inquiry step (round 7): Email Angie and Text Angie are direct links to her own address and number.
+     A click always opens the visitor's app; whatever they typed above is written into the message. Nothing is sent from this page. ---------- */
+  var idea = doc.getElementById("idea");
+  if (idea) {
+    var ideaSt = doc.getElementById("ideaSt"), okMsg = (doc.getElementById("ideaOk") || {}).textContent || "";
+    var compose = function (a) {
+      var f = idea.elements, name = f.name.value.trim(), it = f.idea.value.trim(), ph = f.phone.value.trim(), em = f.email.value.trim();
+      if (!name && !it && !ph && !em) return null; /* nothing typed: the link's own template opens as written */
+      var href = a.getAttribute("href") || "", to = href.split("?")[0];
+      var body = "Hi Angie,\n\n" + (name ? "Name: " + name + "\n" : "") + (ph ? "Phone: " + ph + "\n" : "") + (em ? "Email: " + em + "\n" : "") + "\nMy idea: " + (it || "") + "\n";
+      if (/^mailto:/i.test(to)) return to + "?subject=" + encodeURIComponent("My Tattoo Idea") + "&body=" + encodeURIComponent(body);
+      if (/^sms:/i.test(to)) return to + "?&body=" + encodeURIComponent(body);
+      return null;
+    };
+    ["ideaMail", "ideaText"].forEach(function (k) {
+      var a = doc.getElementById(k); if (!a) return;
+      a.addEventListener("click", function (e) {
+        var u = compose(a); ideaSt.textContent = okMsg;
+        if (u) { e.preventDefault(); window.location.href = u; }
+      });
+    });
+    idea.addEventListener("submit", function (e) { e.preventDefault(); var a = doc.getElementById("ideaMail"); if (a) a.click(); });
+  }
+
+  /* ---------- hero: a mouse nudges the three words a few pixels (deeper word, larger move). Never the footage, never on touch, never while paused. ---------- */
+  var heroWs = Array.prototype.slice.call(h1.querySelectorAll(".w"));
+  if (heroSec) {
+    heroSec.addEventListener("pointermove", function (e) {
+      if (e.pointerType !== "mouse" || PAUSED) return;
+      var r = heroSec.getBoundingClientRect(), nx = (e.clientX - r.left) / r.width - 0.5, ny = (e.clientY - r.top) / r.height - 0.5;
+      heroWs.forEach(function (w, i) { var d = [8, 11, 14][i] || 10; w.style.setProperty("--mx", (nx * d).toFixed(1) + "px"); w.style.setProperty("--my", (ny * d * 0.6).toFixed(1) + "px"); });
+    });
+    heroSec.addEventListener("pointerleave", function () { heroWs.forEach(function (w) { w.style.setProperty("--mx", "0px"); w.style.setProperty("--my", "0px"); }); });
   }
 
   window.__e2 = { vids: vids, state: function () { return { paused: PAUSED, RM: RM, leaf: leafP, scrub: sv ? sv.currentTime : null }; } };
