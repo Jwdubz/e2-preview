@@ -187,7 +187,7 @@
   }
   var scSec = doc.getElementById("scrub"), sv = doc.getElementById("scrubVideo"), svB = doc.getElementById("scrubVideoB");
   var scBar = doc.getElementById("scBar"), hlFill = doc.getElementById("hlFill");
-  var sc1 = makeScrub(scSec, [sv, svB], 4.67, function (p) { if (scBar) scBar.style.width = (p * 100).toFixed(1) + "%"; });
+  [sv, svB].forEach(function (v) { if (v) ply(v); });
   if (leafSec) {
     if ("IntersectionObserver" in window) {
       var lfIO = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { drawLeaf(); lfIO.disconnect(); } }); }, { threshold: 0.5 });

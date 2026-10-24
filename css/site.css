@@ -633,3 +633,7 @@ html.is-paused .foot__big b{color:var(--leaf-hot)!important}
   .foot__col a,.foot__base a{min-height:44px;line-height:44px}
 }
 .stmt .stmt__p{color:rgb(246 238 226/.86)}
+.hero[data-mode="wide"] .hero__h1 .w2{left:calc(var(--pl,0px) + var(--pw,33vw) / 2);transform:translateX(-50%)}
+.scrub{height:auto}
+.scrub__pin{position:relative;top:auto}
+.scrub__t{justify-content:center}
