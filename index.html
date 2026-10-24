@@ -22,11 +22,10 @@
     <span>E² Studios</span>
   </a>
   <nav class="dnav" id="dnav" aria-label="Sections">
-    <a href="#scrub">How It's Made</a>
+    <a href="#cover">Cover-Ups</a>
     <a href="#leaf">The Studio</a>
     <a href="#wall">Portfolio</a>
     <a href="#artist">The Artist</a>
-    <a href="#cover">Cover-Ups</a>
   </nav>
   <div class="top__r">
     <button class="pause" id="pauseBtn" type="button" data-state="playing" aria-pressed="false">
@@ -52,11 +51,10 @@
     </button>
   </div>
   <nav class="sheet__nav" aria-label="Sections">
-    <a href="#scrub" data-close><span>How It's Made</span><i aria-hidden="true">01</i></a>
+    <a href="#cover" data-close><span>Cover-Ups</span><i aria-hidden="true">01</i></a>
     <a href="#leaf" data-close><span>The Studio</span><i aria-hidden="true">02</i></a>
     <a href="#wall" data-close><span>Portfolio</span><i aria-hidden="true">03</i></a>
     <a href="#artist" data-close><span>The Artist</span><i aria-hidden="true">04</i></a>
-    <a href="#cover" data-close><span>Cover-Ups</span><i aria-hidden="true">05</i></a>
   </nav>
   <p class="sheet__k">Next Step</p>
   <div class="sheet__acts">
@@ -88,12 +86,29 @@
   <div class="stage film"><video class="film-el" muted playsinline loop preload="metadata" poster="media/stencil-wide-poster.jpg" data-src="media/stencil-wide.mp4" data-ply data-focus="0.5"></video></div>
 </section>
 
-<section class="scrub" id="scrub" aria-labelledby="h-scrub">
-  <h2 id="h-scrub" class="sr">Outline First. Colour Second.</h2>
-  <div class="scrub__pin">
-    <div class="scrub__pane scrub__pane--a"><p class="scrub__t" aria-hidden="true" id="scT1"><span class="l">Outline</span> <span class="l">First.</span></p><div class="scrub__vid"><video id="scrubVideo" class="film-el" muted playsinline loop autoplay preload="auto" poster="media/scrub-a-poster.jpg" src="media/scrub-a.mp4" aria-hidden="true"></video></div></div>
-    <div class="scrub__pane scrub__pane--b"><p class="scrub__t" aria-hidden="true" id="scT2"><span class="l">Colour</span> <span class="l">Second.</span></p><div class="scrub__vid"><video id="scrubVideoB" class="film-el" muted playsinline loop autoplay preload="auto" poster="media/scrub-b-poster.jpg" src="media/scrub-b.mp4" aria-hidden="true"></video></div></div>
+<section class="heal" id="cover" aria-labelledby="h-heal">
+  <div class="heal__in">
+    <div class="heal__txt rv">
+      <h2 id="h-heal">Cover-Ups.</h2>
+      <p>Covering a decision from your youth, or softening the look of old scars: Angie is here to help.</p>
+      <p class="heal__div"><b>Healing (P)Arts</b> is her division for people who have come through major health conditions such as breast cancer: 3D areola tattoos and scar cover-ups. Message Angie to ask.</p>
+    </div>
+    <figure class="heal__fig">
+      <ol class="heal__steps">
+        <li class="rv"><img src="media/cover-before.jpg" width="720" height="960" loading="lazy" decoding="async" alt="The old tattoo on an inner arm, before the cover-up"><span>Before.</span></li>
+        <li class="rv"><img src="media/cover-stencil.jpg" width="720" height="960" loading="lazy" decoding="async" alt="The new design drawn over the old tattoo"><span>Drawn Over.</span></li>
+        <li class="rv"><img src="media/cover-finished.jpg" width="720" height="960" loading="lazy" decoding="async" alt="The finished cover-up: Yosemite at night, in colour"><span>Finished.</span></li>
+      </ol>
+      <figcaption>A Yosemite cover-up on an inner arm.</figcaption>
+    </figure>
   </div>
+</section>
+
+<section class="beat beat--close" aria-label="Three More Pieces">
+  <div class="stage film"><video class="film-el" muted playsinline loop preload="metadata" poster="media/close-tri-poster.jpg" data-src="media/close-tri.mp4" data-ply data-focus="0.5" aria-hidden="true"></video></div>
+  <ul class="close__labels" aria-label="Three more pieces by Angie">
+    <li>Caduceus Mandala</li><li>Sea Turtle</li><li>Forearm Florals</li>
+  </ul>
 </section>
 
 <section class="leaf" id="leaf" aria-labelledby="h-leaf">
@@ -104,7 +119,7 @@
       <h2 id="h-leaf" class="kick leaf__k">The Studio</h2>
     </div>
     <ol class="leaf__list">
-      <li class="rule rv"><i aria-hidden="true">01</i><h3>Arrive Alone.</h3><p>Privacy Is Paramount. You Are Angie's Sole Focus. A Private Studio Just For You.</p></li>
+      <li class="rule rv"><i aria-hidden="true">01</i><h3>Private Studio.</h3><p>You Are Angie's Sole Focus.</p></li>
       <li class="rule rv"><i aria-hidden="true">02</i><h3>One Client A Day.</h3><p>All of Angie's Energy Poured Into Your Vision</p></li>
       <li class="rule rv"><i aria-hidden="true">03</i><h3>By Appointment Only.</h3><p>Appointment Only - Dedicated Complimentary Consultation by Zoom or FaceTime.</p></li>
     </ol>
@@ -148,29 +163,7 @@
   </div>
 </section>
 
-<section class="heal" id="cover" aria-labelledby="h-heal">
-  <div class="heal__in">
-    <div class="heal__txt rv">
-      <h2 id="h-heal">Cover-Ups.</h2>
-      <p>Covering a decision from your youth, or softening the look of old scars: Angie is here to help.</p>
-      <p class="heal__div"><b>Healing (P)Arts</b> is her division for people who have come through major health conditions such as breast cancer: 3D areola tattoos and scar cover-ups. Message Angie to ask.</p>
-    </div>
-    <figure class="heal__fig">
-      <ol class="heal__steps">
-        <li class="rv"><img src="media/cover-before.jpg" width="720" height="960" loading="lazy" decoding="async" alt="The old tattoo on an inner arm, before the cover-up"><span>Before.</span></li>
-        <li class="rv"><img src="media/cover-stencil.jpg" width="720" height="960" loading="lazy" decoding="async" alt="The new design drawn over the old tattoo"><span>Drawn Over.</span></li>
-        <li class="rv"><img src="media/cover-finished.jpg" width="720" height="960" loading="lazy" decoding="async" alt="The finished cover-up: Yosemite at night, in colour"><span>Finished.</span></li>
-      </ol>
-      <figcaption>A Yosemite cover-up on an inner arm.</figcaption>
-    </figure>
-  </div>
-</section>
-
-<section class="beat beat--close" aria-labelledby="h-close">
-  <div class="stage film"><video class="film-el" muted playsinline loop preload="metadata" poster="media/close-tri-poster.jpg" data-src="media/close-tri.mp4" data-ply data-focus="0.5" aria-hidden="true"></video></div>
-  <ul class="close__labels" aria-label="Three more pieces by Angie">
-    <li>Caduceus Mandala</li><li>Sea Turtle</li><li>Forearm Florals</li>
-  </ul>
+<section class="send" aria-labelledby="h-close">
   <div class="close__cap" id="send" aria-labelledby="h-close">
     <div class="close__l">
       <p class="kick rv">Step 1 of 2</p>
@@ -258,11 +251,10 @@
     </div>
     <nav class="foot__col" aria-label="Footer">
       <p class="foot__h">On This Page</p>
-      <p><a class="fl" href="#scrub">How It's Made</a></p>
+      <p><a class="fl" href="#cover">Cover-Ups</a></p>
       <p><a class="fl" href="#leaf">The Studio</a></p>
       <p><a class="fl" href="#wall">Portfolio</a></p>
       <p><a class="fl" href="#artist">The Artist</a></p>
-      <p><a class="fl" href="#cover">Cover-Ups</a></p>
     </nav>
     <div class="foot__base">
       <p>&copy; 2026, E² Studios. All Rights Reserved.</p>
