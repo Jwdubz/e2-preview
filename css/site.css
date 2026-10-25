@@ -647,6 +647,7 @@ html.is-paused .foot__big b{color:var(--leaf-hot)!important}
 html.is-paused .hw__f{opacity:1}
 html.is-paused .hw__s,html.is-paused .hw__tip{display:none}
 .hero__h1 .w::after{content:none}
+.stmt__line .c{color:var(--accent);transition:none}
 .wall h2{color:var(--cream)}
 .wall .rnd{border-color:var(--cream);color:var(--cream)}
 .wall .rnd:hover{background:var(--cream);color:var(--ink)}
