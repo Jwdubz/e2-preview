@@ -490,7 +490,7 @@ html.is-paused .close__cap.arrive::before{transform:scaleX(1)}
 @media (max-width:700px){
   .foot__in{grid-template-columns:1fr 1fr;gap:28px 20px}
   .foot__col--a{grid-column:1/-1}
-  .foot__top .btn{flex:1 1 100%}
+  .foot__top .btn{flex:1 1 100%;display:flex}
   .foot__big{font-size:clamp(50px,15vw,76px)}
 }
 
@@ -596,7 +596,7 @@ html.is-paused .stmt__p{opacity:1!important;transform:none!important}
 .artist{background:var(--paper);border-top:1px solid rgba(0,0,0,.14)}
 
 @media (max-width:700px){
-  .heal__steps{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;margin-right:calc(-1 * var(--pad));padding-right:var(--pad);overscroll-behavior-x:contain}
+  .heal__steps{display:flex;gap:10px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scrollbar-width:none;margin-right:calc(-1 * var(--pad));padding-right:var(--pad);overscroll-behavior-x:contain}
   .heal__steps::-webkit-scrollbar{display:none}
   .heal__steps li,.heal__steps li:nth-child(3){flex:0 0 74%;grid-column:auto;scroll-snap-align:start}
   .heal__steps li:nth-child(3) img{aspect-ratio:3/4}
