@@ -9,7 +9,7 @@
 <meta name="theme-color" content="#ffffff">
 <link rel="preload" as="font" type="font/woff2" href="fonts/erode-600.woff2" crossorigin>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 rx=%277%27 fill=%27%2361487c%27/%3E%3Ctext x=%2716%27 y=%2723%27 font-size=%2720%27 text-anchor=%27middle%27 fill=%27%23f6efe3%27 font-family=%27serif%27 font-weight=%27700%27%3EE%3C/text%3E%3C/svg%3E">
-<link rel="stylesheet" href="css/site.css?v=20261024q">
+<link rel="stylesheet" href="css/site.css?v=20261024r">
 <script>document.documentElement.className+=" js";</script>
 <script type="text/javascript">(function(w,d){w.clarity=w.clarity||function(){(w.clarity.q=w.clarity.q||[]).push(arguments)};var done=0,ev=["scroll","pointerdown","keydown"],o={passive:true,capture:true};function go(){if(done)return;done=1;ev.forEach(function(e){w.removeEventListener(e,go,o)});var t=d.createElement("script");t.async=1;t.src="https://www.clarity.ms/tag/yvve5xueah";var y=d.getElementsByTagName("script")[0];y.parentNode.insertBefore(t,y)}ev.forEach(function(e){w.addEventListener(e,go,o)});function idle(){w.requestIdleCallback?w.requestIdleCallback(go,{timeout:2500}):setTimeout(go,2500)}d.readyState==="complete"?idle():w.addEventListener("load",idle,{once:true})})(window,document);clarity("set","site","e2studios");</script>
 </head>
@@ -93,10 +93,10 @@
       <p class="heal__div"><b>Healing (P)Arts</b> is her division for people who have come through major health conditions such as breast cancer: 3D areola tattoos and scar cover-ups. Message Angie to ask.</p>
     </div>
     <figure class="heal__fig">
-      <ol class="heal__steps">
-        <li class="rv"><img src="media/cover-before.jpg" width="720" height="960" loading="lazy" decoding="async" alt="The old tattoo on an inner arm, before the cover-up"><span>Before</span></li>
-        <li class="rv"><img src="media/cover-stencil.jpg" width="720" height="960" loading="lazy" decoding="async" alt="The new design drawn over the old tattoo"><span>Drawn Over</span></li>
-        <li class="rv"><img src="media/cover-finished.jpg" width="720" height="960" loading="lazy" decoding="async" alt="The finished cover-up: Yosemite at night, in colour"><span>Finished</span></li>
+      <ol class="heal__steps" data-gallery>
+        <li class="rv"><button type="button" class="heal__zoom" data-full="media/cover-before.jpg"><img src="media/cover-before.jpg" width="720" height="960" loading="lazy" decoding="async" alt="The old tattoo on an inner arm, before the cover-up"></button><span>Before</span></li>
+        <li class="rv"><button type="button" class="heal__zoom" data-full="media/cover-stencil.jpg"><img src="media/cover-stencil.jpg" width="720" height="960" loading="lazy" decoding="async" alt="The new design drawn over the old tattoo"></button><span>Drawn Over</span></li>
+        <li class="rv"><button type="button" class="heal__zoom" data-full="media/cover-finished.jpg"><img src="media/cover-finished.jpg" width="720" height="960" loading="lazy" decoding="async" alt="The finished cover-up: Yosemite at night, in colour"></button><span>Finished</span></li>
       </ol>
     </figure>
   </div>
@@ -132,7 +132,7 @@
       <button type="button" id="wNext" class="rnd" aria-label="Next Pieces"><svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><path d="M7.5 3.5 14 10l-6.5 6.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
     </div>
   </div>
-  <div class="strip" id="strip" role="region" aria-label="Portfolio Pieces, Scroll Sideways" tabindex="0">
+  <div class="strip" id="strip" data-gallery role="region" aria-label="Portfolio Pieces, Scroll Sideways" tabindex="0">
     <button type="button" class="strip__it" data-full="media/work-1.jpg"><span class="strip__fr"><img src="media/work-1.jpg" width="810" height="1080" loading="lazy" alt="A pomegranate with flowers, in colour"></span><span class="strip__cap">Pomegranate With Flowers</span></button>
     <button type="button" class="strip__it" data-full="media/work-5.jpg"><span class="strip__fr"><img src="media/work-5.jpg" width="810" height="1080" loading="lazy" alt="A green watercolour hamsa hand with an eye"></span><span class="strip__cap">Watercolour Hamsa Hand</span></button>
     <button type="button" class="strip__it" data-full="media/work-3.jpg"><span class="strip__fr"><img src="media/work-3.jpg" width="810" height="1080" loading="lazy" alt="A mandala elephant with a key on a forearm"></span><span class="strip__cap">Mandala Elephant With Key</span></button>
@@ -261,9 +261,10 @@
   </div>
 </footer>
 
-<dialog id="lb" class="lb" aria-label="Portfolio Piece">
-  <form method="dialog"><button class="lb__x btn btn--leaf" value="close">Close</button></form>
-  <img id="lbImg" alt="">
+<dialog id="lb" class="lb" aria-label="Photo Viewer">
+  <div class="lb__top"><p class="lb__cap" id="lbCap"></p><button type="button" class="lb__btn" id="lbX" aria-label="Close photo viewer">Close &times;</button></div>
+  <div class="lb__stage" id="lbStage"><img id="lbImg" alt=""></div>
+  <div class="lb__bar"><button type="button" class="lb__btn" id="lbPrev" aria-label="Previous photo">&larr; Previous</button><span class="lb__n" id="lbN" aria-live="polite"></span><button type="button" class="lb__btn" id="lbNext" aria-label="Next photo">Next &rarr;</button><button type="button" class="lb__btn" id="lbZoom" aria-pressed="false">Zoom In</button></div>
 </dialog>
 
 <!-- jw-book:start -->
@@ -274,6 +275,6 @@
 <!-- jw-book:end -->
 
 <script src="data/hero.js"></script>
-<script src="js/main.js?v=20261024f"></script>
+<script src="js/main.js?v=20261024g"></script>
 </body>
 </html>
