@@ -638,6 +638,16 @@ html.is-paused .foot__big b{color:var(--leaf-hot)!important}
 .scrub__pin{position:relative;top:auto}
 .scrub__t{justify-content:center}
 .beat,.beat .stage,.beat .film-el{background:var(--ink)}
+.hw{display:block;overflow:visible}
+.hw__s path{fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;visibility:hidden}
+.hw__f{fill:currentColor;opacity:0;transition:opacity .45s ease}
+.hw__tip{fill:#fff;opacity:0;filter:drop-shadow(0 0 2px #fff) drop-shadow(0 0 8px rgba(255,255,255,.85))}
+.hw.done .hw__f{opacity:1}
+.hw.done .hw__s path{opacity:0;transition:opacity .6s ease .15s}
+html.is-paused .hw__f{opacity:1}
+html.is-paused .hw__s,html.is-paused .hw__tip{display:none}
+.hero__h1.go .w::after{transform:scaleX(0)}
+.hero__h1 .w.inked::after{transform:scaleX(1);transition-delay:.1s}
 .wall h2{color:var(--cream)}
 .wall .rnd{border-color:var(--cream);color:var(--cream)}
 .wall .rnd:hover{background:var(--cream);color:var(--ink)}

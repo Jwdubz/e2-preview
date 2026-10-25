@@ -42,6 +42,7 @@
   function wantMode() { return (window.innerWidth / window.innerHeight >= 0.9) ? "wide" : "tall"; }
   function splitLetters(el, wi) {
     if (el.__split) return; el.__split = true;
+    if (el.querySelector("svg")) { el.style.setProperty("--wi", wi); return; }
     var t = el.textContent; el.textContent = ""; var i = 0;
     t.split("").forEach(function (ch) {
       var c = doc.createElement("span"); c.className = "c"; c.style.setProperty("--i", i++);
@@ -95,7 +96,56 @@
   if (doc.fonts && doc.fonts.ready) doc.fonts.ready.then(placeWords);
   requestAnimationFrame(function () { requestAnimationFrame(function () { h1.classList.add("go"); }); });
   window.addEventListener("resize", function () { buildHero(); placeWords(); });
-  function showAllWords() { h1.classList.add("go"); }
+  function showAllWords() { h1.classList.add("go"); finishHero(); }
+
+  var heroWords = [], heroWrote = false;
+  Array.prototype.forEach.call(h1.querySelectorAll(".hw"), function (s) {
+    var ps = Array.prototype.slice.call(s.querySelectorAll(".hw__s path"));
+    var f = doc.createElementNS("http://www.w3.org/2000/svg", "path"); f.setAttribute("class", "hw__f");
+    f.setAttribute("d", ps.map(function (p) { return p.getAttribute("d"); }).join("")); s.insertBefore(f, s.firstChild);
+    heroWords.push({ s: s, w: s.parentNode, ps: ps, tip: s.querySelector(".hw__tip"), done: false });
+  });
+  function inkWord(o) {
+    if (o.done) return; o.done = true;
+    o.ps.forEach(function (p) { p.style.strokeDasharray = "none"; p.style.visibility = "visible"; });
+    o.tip.style.opacity = 0; o.s.classList.add("done"); o.w.classList.add("inked");
+  }
+  function finishHero() { heroWrote = true; heroWords.forEach(inkWord); }
+  function writeHero() {
+    if (heroWrote || !heroWords.length) return; heroWrote = true;
+    if (PAUSED) { heroWords.forEach(inkWord); return; }
+    var all = 0, at = 0, t0 = 0;
+    heroWords.forEach(function (o) {
+      o.L = o.ps.map(function (p) { return p.getTotalLength(); });
+      o.T = o.L.reduce(function (a, b) { return a + b; }, 0); all += o.T;
+      o.ps.forEach(function (p, i) { p.style.strokeDasharray = "0 " + (o.L[i] + 1); });
+    });
+    heroWords.forEach(function (o) { o.dur = 450 + 2600 * o.T / all; o.at = at; at += o.dur * 0.82; });
+    function ease(p) { return p < .5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2; }
+    function step(n) {
+      if (PAUSED) { heroWords.forEach(inkWord); return; }
+      if (!t0) t0 = n;
+      var live = false;
+      heroWords.forEach(function (o) {
+        if (o.done) return;
+        var p = Math.max(0, Math.min(1, (n - t0 - o.at) / o.dur));
+        if (p >= 1) { inkWord(o); return; }
+        live = true;
+        var x = o.T * (.15 * p + .85 * ease(p)), acc = 0, tp = null;
+        for (var i = 0; i < o.ps.length; i++) {
+          var v = Math.max(0, Math.min(o.L[i], x - acc));
+          o.ps[i].style.strokeDasharray = v + " " + (o.L[i] + 1); o.ps[i].style.visibility = v > 0 ? "visible" : "hidden";
+          if (!tp && v > 0 && v < o.L[i]) tp = o.ps[i].getPointAtLength(v);
+          acc += o.L[i];
+        }
+        if (tp) { o.tip.setAttribute("cx", tp.x); o.tip.setAttribute("cy", tp.y); }
+        o.tip.style.opacity = tp ? 1 : 0;
+      });
+      if (live) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+  setTimeout(writeHero, 300);
 
   var lazies = Array.prototype.slice.call(doc.querySelectorAll("video[data-src]"));
   lazies.forEach(function (v) {
