@@ -6,8 +6,14 @@
   var vids = [];
   var clips = window.HERO_CLIPS || [];
 
+  var onScreen = "IntersectionObserver" in window ? new IntersectionObserver(function (es) {
+    es.forEach(function (e) {
+      var v = e.target; v.__vis = e.isIntersecting;
+      if (v.__vis) tryPlay(v); else { try { v.pause(); } catch (err) {} }
+    });
+  }, { rootMargin: "15% 0px" }) : null;
   function tryPlay(v) {
-    if (PAUSED) return;
+    if (PAUSED || v.__vis === false) return;
     v.muted = true; v.defaultMuted = true; v.playsInline = true;
     v.setAttribute("muted", ""); v.setAttribute("playsinline", ""); v.setAttribute("webkit-playsinline", "");
     var p;
@@ -17,6 +23,7 @@
   function ply(v) {
     if (v.__ply) { tryPlay(v); return; }
     v.__ply = true; vids.push(v);
+    if (onScreen) onScreen.observe(v);
     tryPlay(v);
     [250, 750, 1500, 3000].forEach(function (ms) { setTimeout(function () { if (v.paused) tryPlay(v); }, ms); });
     ["loadeddata", "canplay", "stalled", "suspend", "pause"].forEach(function (ev) {
@@ -55,7 +62,7 @@
     if (mode === heroMode || !clip) return;
     heroMode = mode; stage.setAttribute("data-mode", mode); if (stage.parentNode) stage.parentNode.setAttribute("data-mode", mode);
     var def = clip[mode];
-    if (heroVideo) { var i = vids.indexOf(heroVideo); if (i > -1) vids.splice(i, 1); try { heroVideo.pause(); } catch (e) {} heroVideo.removeAttribute("src"); heroVideo.load(); if (heroVideo.parentNode) heroVideo.parentNode.removeChild(heroVideo); }
+    if (heroVideo) { var i = vids.indexOf(heroVideo); if (i > -1) vids.splice(i, 1); if (onScreen) onScreen.unobserve(heroVideo); try { heroVideo.pause(); } catch (e) {} heroVideo.removeAttribute("src"); heroVideo.load(); if (heroVideo.parentNode) heroVideo.parentNode.removeChild(heroVideo); }
     var v = doc.createElement("video");
     v.id = "heroVideo"; v.className = "film-el"; v.muted = true; v.loop = true; v.playsInline = true; v.preload = "auto";
     v.src = def.src;
@@ -151,8 +158,9 @@
   lazies.forEach(function (v) {
     v.style.setProperty("--fx", Math.round(parseFloat(v.getAttribute("data-focus") || "0.5") * 100) + "%");
   });
+  var phone = window.matchMedia ? window.matchMedia("(max-width: 700px)").matches : false;
   function startLazy(v) {
-    if (!v.getAttribute("src")) { v.setAttribute("src", v.getAttribute("data-src")); v.preload = "auto"; }
+    if (!v.getAttribute("src")) { v.setAttribute("src", (phone && v.getAttribute("data-src-phone")) || v.getAttribute("data-src")); v.preload = "auto"; }
     ply(v);
   }
   if ("IntersectionObserver" in window) {
