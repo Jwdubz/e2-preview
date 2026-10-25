@@ -385,6 +385,52 @@
     cap.classList.remove("arrive"); void cap.offsetWidth; cap.classList.add("arrive");
     var h = doc.getElementById("h-close"); if (h) { try { h.focus({ preventScroll: true }); } catch (e) { h.focus(); } }
   }
+  var TAU = 0.41;
+  var glide = (function () {
+    var desk = window.matchMedia ? window.matchMedia("(min-width: 761px)") : null;
+    var off = /[?&]smooth=off\b/.test(location.search);
+    var g = { active: false, cur: 0, target: 0, raf: 0, last: 0 };
+    function maxY() { return Math.max(0, root.scrollHeight - window.innerHeight); }
+    function clampY(y) { return Math.min(maxY(), Math.max(0, y)); }
+    function stop() { if (g.raf) cancelAnimationFrame(g.raf); g.raf = 0; g.last = 0; }
+    function tick(t) {
+      var dt = g.last ? Math.min(0.1, Math.max(0, (t - g.last) / 1000)) : 1 / 60;
+      g.last = t; g.target = clampY(g.target);
+      g.cur += (g.target - g.cur) * (1 - Math.exp(-dt / TAU));
+      if (Math.abs(g.target - g.cur) <= 0.5) g.cur = g.target;
+      window.scrollTo(0, g.cur);
+      if (g.cur === g.target) { stop(); return; }
+      g.raf = requestAnimationFrame(tick);
+    }
+    g.to = function (y) {
+      if (!g.raf) g.cur = window.scrollY;
+      g.target = clampY(y);
+      if (!g.raf) g.raf = requestAnimationFrame(tick);
+    };
+    window.addEventListener("scroll", function () {
+      if (!g.active || (g.raf && Math.abs(window.scrollY - g.cur) <= 2)) return;
+      stop(); g.cur = g.target = window.scrollY;
+    }, { passive: true });
+    window.addEventListener("wheel", function (e) {
+      if (!g.active || e.defaultPrevented || e.ctrlKey || e.shiftKey || e.metaKey) return;
+      var dy = e.deltaY;
+      if (!dy || Math.abs(e.deltaX) > Math.abs(dy)) return;
+      if (e.target && e.target.closest && e.target.closest(".sheet, dialog, textarea")) return;
+      if (e.deltaMode === 1) dy *= 40; else if (e.deltaMode === 2) dy *= window.innerHeight;
+      e.preventDefault();
+      g.to((g.raf ? g.target : window.scrollY) + dy);
+    }, { passive: false });
+    function setOn() {
+      g.active = !off && !!(desk && desk.matches);
+      if (!g.active) stop();
+      if (g.active) { root.setAttribute("data-scroll-tau", String(TAU)); root.classList.add("smooth-scroll-active"); }
+      else { root.removeAttribute("data-scroll-tau"); root.classList.remove("smooth-scroll-active"); }
+    }
+    if (desk) { if (desk.addEventListener) desk.addEventListener("change", setOn); else if (desk.addListener) desk.addListener(setOn); }
+    setOn();
+    window.__smoothScroll = "native"; window.__smoothScrollTau = TAU;
+    return g;
+  })();
   function goTo(id) {
     var el = doc.getElementById(id); if (!el) return false;
     var maxY = doc.documentElement.scrollHeight - window.innerHeight;
@@ -392,7 +438,7 @@
     y = Math.max(0, Math.min(maxY, y));
     if (history.pushState) { try { history.pushState(null, "", "#" + id); } catch (e) {} }
     if (Math.abs(window.scrollY - y) < 4) { arrive(el); return true; }
-    window.scrollTo({ top: y, behavior: "smooth" });
+    if (glide.active) glide.to(y); else window.scrollTo({ top: y, behavior: "smooth" });
     var last = -1, still = 0, t0 = Date.now();
     (function wait() {
       var s = window.scrollY;
