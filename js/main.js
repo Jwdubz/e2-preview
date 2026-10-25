@@ -210,7 +210,31 @@
       stmtLine.appendChild(sw); if (wi < words.length - 1) stmtLine.appendChild(doc.createTextNode(" "));
     });
   }
-  function inkStmt() { if (stmtSec) stmtSec.classList.add("ink"); }
+  var sig = stmtSec && stmtSec.querySelector(".sig"), sigRun = false;
+  if (sig) Array.prototype.forEach.call(sig.querySelectorAll(".sig__w"), function (s) {
+    var d = Array.prototype.map.call(s.querySelectorAll(".sig__s path"), function (p) { return p.getAttribute("d"); }).join("");
+    var f = doc.createElementNS("http://www.w3.org/2000/svg", "path"); f.setAttribute("class", "sig__f"); f.setAttribute("d", d); s.insertBefore(f, s.firstChild);
+  });
+  function drawSig() {
+    if (!sig || sigRun) return; sigRun = true;
+    var ps = [].slice.call(sig.querySelectorAll(".sig__s path")), tips = [].slice.call(sig.querySelectorAll(".sig__tip")), L = [], T = 0, t0 = 0, DUR = 4200;
+    ps.forEach(function (p) { var l = p.getTotalLength(); L.push(l); T += l; p.style.strokeDasharray = "0 " + (l + 1); });
+    function set(x) {
+      var acc = 0, tp = null, ts = null;
+      for (var i = 0; i < ps.length; i++) {
+        var v = Math.max(0, Math.min(L[i], x - acc));
+        ps[i].style.strokeDasharray = v + " " + (L[i] + 1); ps[i].style.visibility = v > 0 ? "visible" : "hidden";
+        if (!tp && v > 0 && v < L[i]) { tp = ps[i].getPointAtLength(v); ts = ps[i].ownerSVGElement; }
+        acc += L[i];
+      }
+      tips.forEach(function (c) { var on = !!tp && c.ownerSVGElement === ts; if (on) { c.setAttribute("cx", tp.x); c.setAttribute("cy", tp.y); } c.style.opacity = on ? 1 : 0; });
+    }
+    function done() { set(T); tips.forEach(function (c) { c.style.opacity = 0; }); sig.classList.add("done"); }
+    function ease(p) { return p < .5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2; }
+    function step(n) { if (PAUSED) { done(); return; } if (!t0) t0 = n; var p = Math.min(1, (n - t0) / DUR); set(T * (.15 * p + .85 * ease(p))); if (p < 1) requestAnimationFrame(step); else done(); }
+    if (PAUSED) done(); else requestAnimationFrame(step);
+  }
+  function inkStmt() { if (!stmtSec) return; stmtSec.classList.add("ink"); setTimeout(drawSig, 900); }
   if (stmtSec) {
     if ("IntersectionObserver" in window) {
       var inkIO = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { inkStmt(); inkIO.disconnect(); } }); }, { threshold: 0.45 });
