@@ -138,7 +138,9 @@ html.lb-open{overflow:hidden}
 .lb.zoomed .lb__stage img{max-width:none;max-height:none;border-radius:0;cursor:zoom-out}
 .lb__bar{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:10px;padding:clamp(12px,2vw,24px) 16px calc(clamp(12px,2vw,24px) + env(safe-area-inset-bottom,0px))}
 .lb__btn{min-height:44px;padding:0 18px;border-radius:999px;border:1.5px solid rgba(251,244,230,.5);background:transparent;color:var(--cream);font:500 15px/1 var(--body);cursor:pointer;transition:background-color .2s,color .2s,border-color .2s}
-.lb__btn:hover:not(:disabled){background:var(--cream);color:#000;border-color:var(--cream)}
+.lb__btn,.strip__it,.heal__zoom{-webkit-tap-highlight-color:transparent}
+@media (hover:hover){ .lb__btn:hover:not(:disabled){background:var(--cream);color:#000;border-color:var(--cream)} }
+.lb__btn:active:not(:disabled){background:rgba(251,244,230,.18)}
 .lb__btn:disabled{opacity:.35;cursor:default}
 .lb__n{min-width:4.6em;text-align:center;font:500 15px/1 var(--body);color:rgba(251,244,230,.8)}
 .heal__zoom{display:block;width:100%;padding:0;border:0;background:none;border-radius:8px;cursor:zoom-in}
