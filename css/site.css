@@ -633,7 +633,7 @@ html.is-paused .foot__big b{color:var(--leaf-hot)!important}
   .foot__col a,.foot__base a{min-height:44px;line-height:44px}
 }
 .stmt .stmt__p{color:rgb(246 238 226/.86)}
-.hero[data-mode="wide"] .hero__h1 .w{left:var(--cx,calc(var(--pl,0px) + var(--pw,33vw) / 2));transform:translateX(-50%)}
+.hero[data-mode="wide"] .hero__h1 .w{left:calc(var(--pl,0px) + var(--pw,33vw) / 2);transform:translateX(-50%)}
 .hero[data-mode="tall"] .hero__h1{grid-template-columns:repeat(2,max-content);justify-content:center;text-align:center}
 .hero[data-mode="tall"] .hero__h1 .w3{grid-column:1 / -1;justify-self:center;margin-left:auto;margin-right:auto}
 .scrub{height:auto}

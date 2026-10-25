@@ -61,34 +61,6 @@
     stage.appendChild(v); heroVideo = v; ply(v);
   }
   var PANELS = [[0, 638], [641, 1279], [1282, 1920]];
-  // Left edge of the forearm in the third panel's payoff shot, in source video px [y, x].
-  var ARM = [[600, 1535], [700, 1560], [800, 1598], [850, 1625], [900, 1650], [1000, 1675]];
-  function armAt(y) {
-    if (y <= ARM[0][0]) return ARM[0][1];
-    for (var i = 1; i < ARM.length; i++) if (y <= ARM[i][0]) { var a = ARM[i - 1], b = ARM[i]; return a[1] + (b[1] - a[1]) * (y - a[0]) / (b[0] - a[0]); }
-    return ARM[ARM.length - 1][1];
-  }
-  var inkCtx = null;
-  function clearArm(w, W, H, sc, off) {
-    w.style.removeProperty("--cx");
-    var cs = w.querySelectorAll(".c"), st = getComputedStyle(w);
-    if (cs.length < 2) return;
-    inkCtx = inkCtx || doc.createElement("canvas").getContext("2d");
-    if (!inkCtx) return;
-    inkCtx.font = st.fontWeight + " " + st.fontSize + " " + st.fontFamily;
-    var x0 = w.offsetLeft - w.offsetWidth / 2, offY = (sc * 1080 - H) / 2, lh = parseFloat(st.lineHeight) || parseFloat(st.fontSize), shift = 0;
-    for (var k = cs.length - 2; k < cs.length; k++) {
-      var m = inkCtx.measureText(cs[k].textContent);
-      var base = w.offsetTop + (lh - m.fontBoundingBoxAscent - m.fontBoundingBoxDescent) / 2 + m.fontBoundingBoxAscent;
-      var right = x0 + cs[k].offsetLeft + m.actualBoundingBoxRight, lim = Infinity;
-      for (var y = base - m.actualBoundingBoxAscent; y <= base + m.actualBoundingBoxDescent; y += 4) lim = Math.min(lim, (armAt((y + offY) / sc) - 24) * sc - off);
-      shift = Math.min(shift, lim - right);
-    }
-    if (shift < 0) {
-      var pl = parseFloat(w.style.getPropertyValue("--pl")), pw = parseFloat(w.style.getPropertyValue("--pw")), pad = Math.min(28, Math.max(14, W * 0.015));
-      w.style.setProperty("--cx", Math.max(pl + pw / 2 + shift, pl + pad + w.offsetWidth / 2).toFixed(1) + "px");
-    }
-  }
   var heroSub = doc.getElementById("heroSub");
   function placeSub() {
     if (!heroSub) return;
@@ -106,7 +78,7 @@
   }
   function placeWords() {
     var ws = h1.querySelectorAll(".w");
-    if (heroMode !== "wide") { h1.style.fontSize = ""; ws.forEach(function (w) { w.style.removeProperty("--pl"); w.style.removeProperty("--pw"); w.style.removeProperty("--cx"); }); placeSub(); return; }
+    if (heroMode !== "wide") { h1.style.fontSize = ""; ws.forEach(function (w) { w.style.removeProperty("--pl"); w.style.removeProperty("--pw"); }); placeSub(); return; }
     var W = stage.clientWidth, H = stage.clientHeight, dw = Math.max(W, H * 16 / 9), sc = dw / 1920, off = (dw - W) / 2;
     ws.forEach(function (w, i) {
       var a = Math.max(0, PANELS[i][0] * sc - off), b = Math.min(W, PANELS[i][1] * sc - off);
@@ -116,7 +88,6 @@
     var fs = parseFloat(getComputedStyle(h1).fontSize), worst = 1;
     ws.forEach(function (w) { var r = doc.createRange(); r.selectNodeContents(w); var tw = r.getBoundingClientRect().width, room = parseFloat(w.style.getPropertyValue("--pw")) - 2 * Math.min(28, Math.max(14, W * 0.015)); if (tw > room) worst = Math.min(worst, room / tw); });
     if (worst < 1) h1.style.fontSize = (fs * worst * 0.97).toFixed(1) + "px";
-    clearArm(ws[2], W, H, sc, off);
     placeSub();
   }
   Array.prototype.forEach.call(h1.querySelectorAll(".w"), function (w, n) { splitLetters(w, n); });
